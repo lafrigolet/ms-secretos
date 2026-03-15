@@ -1,0 +1,28 @@
+# Variables de entorno — nunca commitear
+.env
+**/.env
+
+# Dependencias
+node_modules
+**/node_modules
+
+# Logs
+*.log
+**/logs
+
+# Build
+dist
+**/dist
+build
+**/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*~
+
