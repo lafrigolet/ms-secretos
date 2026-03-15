@@ -1,3 +1,5 @@
+version: '3.9'
+
 # ══════════════════════════════════════════════════════════════════
 # Secretos del Agua — Docker Compose (desarrollo local)
 # ══════════════════════════════════════════════════════════════════
@@ -188,14 +190,34 @@ services:
   #     - sda-network
 
   # ── SAP Integration Service ─────────────────────────────────────
-  # (pendiente de implementar)
-  # sap-integration-service:
-  #   build:
-  #     context: ./services/sap-integration-service
-  #     dockerfile: Dockerfile
-  #   expose:
-  #     - "3010"
-  #   ports:
-  #     - "${SAP_INTEGRATION_SERVICE_PORT:-3010}:3010"
-  #   networks:
-  #     - sda-network
+  sap-integration-service:
+    build:
+      context: ./services/sap-integration-service
+      dockerfile: Dockerfile
+    expose:
+      - "3010"
+    ports:
+      - "${SAP_INTEGRATION_SERVICE_PORT:-3010}:3010"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3010
+      - HOST=0.0.0.0
+      - SAP_MODE=${SAP_MODE:-stub}
+      - SAP_BASE_URL=${SAP_BASE_URL:-}
+      - SAP_CLIENT=${SAP_CLIENT:-100}
+      - SAP_USER=${SAP_USER:-}
+      - SAP_PASSWORD=${SAP_PASSWORD:-}
+      - SAP_LANGUAGE=${SAP_LANGUAGE:-ES}
+      - CACHE_TTL_CUSTOMERS=${CACHE_TTL_CUSTOMERS:-300}
+      - CACHE_TTL_PRODUCTS=${CACHE_TTL_PRODUCTS:-600}
+      - CACHE_TTL_PRICES=${CACHE_TTL_PRICES:-300}
+      - CACHE_TTL_STOCK=${CACHE_TTL_STOCK:-60}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3010/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
