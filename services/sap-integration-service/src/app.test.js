@@ -5,12 +5,12 @@ import corsPlugin from '@fastify/cors'
 import swaggerPlugin from '@fastify/swagger'
 import swaggerUiPlugin from '@fastify/swagger-ui'
 
-import { SapService } from './services/SapService.js'
-import { customerRoutes } from './routes/customers.js'
-import { catalogRoutes } from './routes/catalog.js'
-import { orderRoutes } from './routes/orders.js'
-import { healthRoutes } from './routes/health.js'
-import { errorHandler } from './middleware/errorHandler.js'
+import { SapService } from '../services/SapService.js'
+import { customerRoutes } from '../routes/customers.js'
+import { catalogRoutes } from '../routes/catalog.js'
+import { orderRoutes } from '../routes/orders.js'
+import { healthRoutes } from '../routes/health.js'
+import { errorHandler } from '../middleware/errorHandler.js'
 
 // ── Setup ─────────────────────────────────────────────────────────
 // Forzamos modo stub independientemente del .env

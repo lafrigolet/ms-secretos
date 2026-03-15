@@ -77,4 +77,3 @@ try {
   app.log.error(err)
   process.exit(1)
 }
-

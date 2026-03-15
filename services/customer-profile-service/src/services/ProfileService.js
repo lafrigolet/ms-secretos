@@ -1,4 +1,4 @@
-import { SapIntegrationClient } from './SapIntegrationClient.js'
+import { SapIntegrationClient } from '../clients/SapIntegrationClient.js'
 
 // Permisos por perfil — define qué puede hacer cada tipo de cliente
 const PROFILE_PERMISSIONS = {

@@ -1,4 +1,4 @@
-import { SapIntegrationClient } from './sapIntegrationClient.js'
+import { SapIntegrationClient } from '../clients/SapIntegrationClient.js'
 
 /**
  * AuthService
