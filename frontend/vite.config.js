@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    // En desarrollo, Vite proxea las llamadas /api al nginx (o directamente al servicio)
+    historyApiFallback: true,
     proxy: {
       '/api': {
         target: 'http://nginx:80',
