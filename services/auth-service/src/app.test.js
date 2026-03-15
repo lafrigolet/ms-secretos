@@ -12,7 +12,7 @@ import { registerAuthDecorator } from '../middleware/authenticate.js'
 import { errorHandler } from '../middleware/errorHandler.js'
 
 // ── Setup ─────────────────────────────────────────────────────────
-process.env.NODE_ENV = 'development'  // activa el STUB en sapIntegrationClient
+process.env.NODE_ENV = 'development'  // activa el STUB en clients/SapIntegrationClient.js
 process.env.JWT_SECRET = 'test-secret-para-tests'
 
 async function buildApp () {

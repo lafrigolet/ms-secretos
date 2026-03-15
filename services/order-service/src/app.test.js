@@ -12,41 +12,43 @@ import { errorHandler } from './middleware/errorHandler.js'
 process.env.JWT_SECRET = 'test-secret'
 process.env.SAP_INTEGRATION_URL = 'http://localhost:3010'
 
+// ── Mock de global.fetch ──────────────────────────────────────────
+// Intercepta llamadas de los tres clientes en clients/:
+//   - SapIntegrationClient  → sap-integration-service
+//   - NotificationClient    → notification-service (fire-and-forget, ignoramos)
+//   - AuditClient           → audit-service (fire-and-forget, ignoramos)
 const ORDERS = [
   {
-    orderId: 'SDA-2025-0890',
-    sapCode: 'SDA-00423',
-    date: '2025-03-08',
-    status: 'SHIPPED',
-    items: [
-      { productCode: 'P-RT-001', name: 'Champú Restaurador', quantity: 6, unitPrice: 16.00 }
-    ],
-    total: 96.00
+    orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08',
+    status: 'SHIPPED', items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 6, unitPrice: 16.00 }], total: 96.00
   }
 ]
 
-// Mock fetch — simula sap-integration-service y servicios asíncronos
 global.fetch = async (url, opts) => {
-  const path = url.replace('http://localhost:3010', '').replace('http://notification-service:3007', '').replace('http://audit-service:3009', '')
+  const path = url
+    .replace('http://localhost:3010', '')
+    .replace('http://notification-service:3007', '')
+    .replace('http://audit-service:3009', '')
 
-  if (path.includes('/internal/orders/SDA-00423')) return { ok: true, json: async () => ORDERS }
-  if (path.includes('/internal/orders/order/SDA-2025-0890')) return { ok: true, json: async () => ORDERS[0] }
-  if (path.includes('/internal/orders/order/NO-EXISTE')) return { ok: false, status: 404, json: async () => null }
+  if (path === '/internal/orders/SDA-00423')
+    return { ok: true, json: async () => ORDERS }
+  if (path === '/internal/orders/order/SDA-2025-0890')
+    return { ok: true, json: async () => ORDERS[0] }
+  if (path === '/internal/orders/order/NO-EXISTE')
+    return { ok: false, status: 404, json: async () => null }
   if (path === '/internal/orders' && opts?.method === 'POST') {
     const body = JSON.parse(opts.body)
     return {
       ok: true,
       json: async () => ({
-        orderId: 'SDA-2025-9999',
-        sapCode: body.sapCode,
+        orderId: 'SDA-2025-9999', sapCode: body.sapCode,
         date: new Date().toISOString().split('T')[0],
-        status: 'CONFIRMED',
-        items: body.items,
+        status: 'CONFIRMED', items: body.items,
         total: body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
       })
     }
   }
-  // notification y audit — ignoramos
+  // notification-service y audit-service: fire-and-forget, respondemos OK
   return { ok: true, json: async () => ({}) }
 }
 
@@ -97,26 +99,23 @@ describe('HU-21 — Estado de pedido en tiempo real', () => {
 
   test('pedido no existente devuelve 404', async () => {
     const app = await buildApp()
-    const res = await app.inject({ method: 'GET', url: '/orders/NO-EXISTE', headers: { authorization: `Bearer ${token(app)}` } })
-    assert.equal(res.statusCode, 404)
+    assert.equal((await app.inject({ method: 'GET', url: '/orders/NO-EXISTE', headers: { authorization: `Bearer ${token(app)}` } })).statusCode, 404)
   })
 
-  test('cliente no puede ver pedido de otro cliente — 403', async () => {
+  test('cliente no puede ver pedido de otro — 403', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'GET', url: '/orders/SDA-2025-0890',
-      headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` }
-    })
-    assert.equal(res.statusCode, 403)
+    assert.equal(
+      (await app.inject({ method: 'GET', url: '/orders/SDA-2025-0890', headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` } })).statusCode,
+      403
+    )
   })
 
   test('admin puede ver cualquier pedido', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'GET', url: '/orders/SDA-2025-0890',
-      headers: { authorization: `Bearer ${token(app, 'ADMIN-001', 'ADMIN')}` }
-    })
-    assert.equal(res.statusCode, 200)
+    assert.equal(
+      (await app.inject({ method: 'GET', url: '/orders/SDA-2025-0890', headers: { authorization: `Bearer ${token(app, 'ADMIN-001', 'ADMIN')}` } })).statusCode,
+      200
+    )
   })
 })
 
@@ -135,32 +134,25 @@ describe('HU-17 — Confirmar pedido', () => {
 
   test('pedido sin items devuelve 400', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'POST', url: '/orders',
-      headers: { authorization: `Bearer ${token(app)}` },
-      payload: { items: [] }
-    })
-    assert.equal(res.statusCode, 400)
+    assert.equal(
+      (await app.inject({ method: 'POST', url: '/orders', headers: { authorization: `Bearer ${token(app)}` }, payload: { items: [] } })).statusCode,
+      400
+    )
   })
 
   test('pedido sin body devuelve 400', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'POST', url: '/orders',
-      headers: { authorization: `Bearer ${token(app)}` },
-      payload: {}
-    })
-    assert.equal(res.statusCode, 400)
+    assert.equal(
+      (await app.inject({ method: 'POST', url: '/orders', headers: { authorization: `Bearer ${token(app)}` }, payload: {} })).statusCode,
+      400
+    )
   })
 })
 
 describe('HU-19 — Repetir pedido anterior', () => {
   test('devuelve items del pedido anterior', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'POST', url: '/orders/SDA-2025-0890/repeat',
-      headers: { authorization: `Bearer ${token(app)}` }
-    })
+    const res = await app.inject({ method: 'POST', url: '/orders/SDA-2025-0890/repeat', headers: { authorization: `Bearer ${token(app)}` } })
     assert.equal(res.statusCode, 200)
     assert.ok(Array.isArray(res.json().items))
     assert.ok(res.json().items.length > 0)
@@ -168,19 +160,17 @@ describe('HU-19 — Repetir pedido anterior', () => {
 
   test('no puede repetir pedido de otro cliente — 403', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'POST', url: '/orders/SDA-2025-0890/repeat',
-      headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` }
-    })
-    assert.equal(res.statusCode, 403)
+    assert.equal(
+      (await app.inject({ method: 'POST', url: '/orders/SDA-2025-0890/repeat', headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` } })).statusCode,
+      403
+    )
   })
 
   test('pedido no existente devuelve 404', async () => {
     const app = await buildApp()
-    const res = await app.inject({
-      method: 'POST', url: '/orders/NO-EXISTE/repeat',
-      headers: { authorization: `Bearer ${token(app)}` }
-    })
-    assert.equal(res.statusCode, 404)
+    assert.equal(
+      (await app.inject({ method: 'POST', url: '/orders/NO-EXISTE/repeat', headers: { authorization: `Bearer ${token(app)}` } })).statusCode,
+      404
+    )
   })
 })

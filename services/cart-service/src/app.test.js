@@ -10,14 +10,23 @@ import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.JWT_SECRET = 'test-secret'
-// Mock promotions-service
+
+// ── Mock de global.fetch ──────────────────────────────────────────
+// clients/PromotionsClient.js usa HttpClient que internamente usa fetch.
+// Simulamos una respuesta vacía del promotions-service para aislar
+// los tests del cart de cualquier dependencia externa.
 global.fetch = async () => ({ ok: true, json: async () => ({ benefits: [] }) })
 
 async function buildApp () {
   const app = Fastify({ logger: false })
   await app.register(corsPlugin)
   await app.register(jwtPlugin, { secret: process.env.JWT_SECRET })
-  await app.register(swaggerPlugin, { openapi: { info: { title: 'test', version: '1.0.0' }, components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } } } })
+  await app.register(swaggerPlugin, {
+    openapi: {
+      info: { title: 'test', version: '1.0.0' },
+      components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } }
+    }
+  })
   await app.register(swaggerUiPlugin, { routePrefix: '/docs' })
   registerAuthDecorators(app)
   app.setErrorHandler(errorHandler)
@@ -25,9 +34,11 @@ async function buildApp () {
   return app
 }
 
-const token = (app, sub = 'SDA-TEST') => app.jwt.sign({ sub, profile: 'PREMIUM', role: 'CUSTOMER' })
+const token = (app, sub = 'SDA-TEST') =>
+  app.jwt.sign({ sub, profile: 'PREMIUM', role: 'CUSTOMER' })
 const item = { productCode: 'P-RT-001', name: 'Champú', quantity: 2, unitPrice: 16.00 }
 
+// ══════════════════════════════════════════════════════════════════
 describe('HU-14 — Gestión de cesta', () => {
   test('cesta vacía al inicio', async () => {
     const app = await buildApp()

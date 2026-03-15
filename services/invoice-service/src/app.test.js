@@ -12,6 +12,9 @@ import { errorHandler } from './middleware/errorHandler.js'
 process.env.JWT_SECRET = 'test-secret'
 process.env.SAP_INTEGRATION_URL = 'http://localhost:3010'
 
+// ── Mock de global.fetch ──────────────────────────────────────────
+// clients/SapIntegrationClient.js usa HttpClient que internamente
+// usa fetch. Interceptamos las llamadas al sap-integration-service.
 const ORDERS = [
   { orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08', status: 'DELIVERED', total: 96.00, invoiceId: 'FAC-2025-0890' },
   { orderId: 'SDA-2025-0812', sapCode: 'SDA-00423', date: '2025-02-21', status: 'DELIVERED', total: 289.00, invoiceId: 'FAC-2025-0812' }
@@ -52,6 +55,7 @@ async function buildApp () {
 const token = (app, sub = 'SDA-00423', role = 'CUSTOMER') =>
   app.jwt.sign({ sub, role })
 
+// ══════════════════════════════════════════════════════════════════
 describe('HU-20 — Facturas', () => {
   test('sin token devuelve 401', async () => {
     const app = await buildApp()
@@ -85,20 +89,23 @@ describe('HU-20 — Facturas', () => {
 
   test('factura no existente devuelve 404', async () => {
     const app = await buildApp()
-    const res = await app.inject({ method: 'GET', url: '/invoices/NO-EXISTE', headers: { authorization: `Bearer ${token(app)}` } })
-    assert.equal(res.statusCode, 404)
+    assert.equal((await app.inject({ method: 'GET', url: '/invoices/NO-EXISTE', headers: { authorization: `Bearer ${token(app)}` } })).statusCode, 404)
   })
 
   test('cliente no puede ver factura de otro — 403', async () => {
     const app = await buildApp()
-    const res = await app.inject({ method: 'GET', url: '/invoices/FAC-2025-0890', headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` } })
-    assert.equal(res.statusCode, 403)
+    assert.equal(
+      (await app.inject({ method: 'GET', url: '/invoices/FAC-2025-0890', headers: { authorization: `Bearer ${token(app, 'SDA-OTRO')}` } })).statusCode,
+      403
+    )
   })
 
   test('admin puede ver cualquier factura', async () => {
     const app = await buildApp()
-    const res = await app.inject({ method: 'GET', url: '/invoices/FAC-2025-0890', headers: { authorization: `Bearer ${token(app, 'ADMIN-001', 'ADMIN')}` } })
-    assert.equal(res.statusCode, 200)
+    assert.equal(
+      (await app.inject({ method: 'GET', url: '/invoices/FAC-2025-0890', headers: { authorization: `Bearer ${token(app, 'ADMIN-001', 'ADMIN')}` } })).statusCode,
+      200
+    )
   })
 
   test('endpoint de descarga devuelve URL del PDF', async () => {
