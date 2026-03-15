@@ -1,0 +1,201 @@
+# ══════════════════════════════════════════════════════════════════
+# Secretos del Agua — Docker Compose (desarrollo local)
+# ══════════════════════════════════════════════════════════════════
+#
+# Arrancar todo:              docker compose up --build
+# Solo auth + frontend:       docker compose up --build nginx frontend auth-service
+# Logs de un servicio:        docker compose logs -f auth-service
+# Reconstruir un servicio:    docker compose up --build auth-service
+
+networks:
+  sda-network:
+    driver: bridge
+
+services:
+
+  # ── Nginx (reverse proxy) ───────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - auth-service
+    networks:
+      - sda-network
+    restart: unless-stopped
+
+  # ── Frontend (React + Vite) ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    expose:
+      - "5173"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    volumes:
+      - ./frontend/src:/app/src        # hot-reload: cambios en src se reflejan al instante
+    networks:
+      - sda-network
+    restart: unless-stopped
+
+  # ── Auth Service ────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    expose:
+      - "3001"
+    ports:
+      - "${AUTH_SERVICE_PORT:-3001}:3001"   # acceso directo para pruebas y /docs
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3001
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-8h}
+      - SAP_INTEGRATION_URL=${SAP_INTEGRATION_SERVICE_URL:-http://sap-integration-service:3010}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Catalog Service ─────────────────────────────────────────────
+  # (pendiente de implementar — descomentar cuando esté listo)
+  # catalog-service:
+  #   build:
+  #     context: ./services/catalog-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3002"
+  #   ports:
+  #     - "${CATALOG_SERVICE_PORT:-3002}:3002"
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+  #     - PORT=3002
+  #     - HOST=0.0.0.0
+  #     - JWT_SECRET=${JWT_SECRET}
+  #     - SAP_INTEGRATION_URL=${SAP_INTEGRATION_SERVICE_URL}
+  #   networks:
+  #     - sda-network
+
+  # ── Customer Profile Service ────────────────────────────────────
+  # (pendiente de implementar)
+  # customer-profile-service:
+  #   build:
+  #     context: ./services/customer-profile-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3003"
+  #   ports:
+  #     - "${CUSTOMER_PROFILE_SERVICE_PORT:-3003}:3003"
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+  #     - PORT=3003
+  #     - HOST=0.0.0.0
+  #     - JWT_SECRET=${JWT_SECRET}
+  #   networks:
+  #     - sda-network
+
+  # ── Promotions Service ──────────────────────────────────────────
+  # (pendiente de implementar)
+  # promotions-service:
+  #   build:
+  #     context: ./services/promotions-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3004"
+  #   ports:
+  #     - "${PROMOTIONS_SERVICE_PORT:-3004}:3004"
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+  #     - PORT=3004
+  #     - HOST=0.0.0.0
+  #     - JWT_SECRET=${JWT_SECRET}
+  #   networks:
+  #     - sda-network
+
+  # ── Cart Service ────────────────────────────────────────────────
+  # (pendiente de implementar)
+  # cart-service:
+  #   build:
+  #     context: ./services/cart-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3005"
+  #   ports:
+  #     - "${CART_SERVICE_PORT:-3005}:3005"
+  #   networks:
+  #     - sda-network
+
+  # ── Order Service ───────────────────────────────────────────────
+  # (pendiente de implementar)
+  # order-service:
+  #   build:
+  #     context: ./services/order-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3006"
+  #   ports:
+  #     - "${ORDER_SERVICE_PORT:-3006}:3006"
+  #   networks:
+  #     - sda-network
+
+  # ── Notification Service ────────────────────────────────────────
+  # (pendiente de implementar)
+  # notification-service:
+  #   build:
+  #     context: ./services/notification-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3007"
+  #   ports:
+  #     - "${NOTIFICATION_SERVICE_PORT:-3007}:3007"
+  #   networks:
+  #     - sda-network
+
+  # ── Invoice Service ─────────────────────────────────────────────
+  # (pendiente de implementar)
+  # invoice-service:
+  #   build:
+  #     context: ./services/invoice-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3008"
+  #   ports:
+  #     - "${INVOICE_SERVICE_PORT:-3008}:3008"
+  #   networks:
+  #     - sda-network
+
+  # ── Audit Service ───────────────────────────────────────────────
+  # (pendiente de implementar)
+  # audit-service:
+  #   build:
+  #     context: ./services/audit-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3009"
+  #   ports:
+  #     - "${AUDIT_SERVICE_PORT:-3009}:3009"
+  #   networks:
+  #     - sda-network
+
+  # ── SAP Integration Service ─────────────────────────────────────
+  # (pendiente de implementar)
+  # sap-integration-service:
+  #   build:
+  #     context: ./services/sap-integration-service
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - "3010"
+  #   ports:
+  #     - "${SAP_INTEGRATION_SERVICE_PORT:-3010}:3010"
+  #   networks:
+  #     - sda-network
