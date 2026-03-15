@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #F7F4EF;
+    color: #2C2C28;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input, button, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-sage-dark text-off-white rounded-lg px-6 py-3 text-sm font-medium
+           transition-colors hover:bg-sage cursor-pointer border-0;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent text-charcoal border border-border rounded-lg px-6 py-3
+           text-sm transition-colors hover:border-sage hover:text-sage-dark cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border-0 text-sage-dark text-sm cursor-pointer
+           underline underline-offset-2;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-3 border border-border rounded-lg text-sm text-charcoal
+           bg-cream transition-colors outline-none focus:border-sage;
+  }
+
+  .form-label {
+    @apply block text-xs tracking-widest uppercase text-muted mb-2 font-medium;
+  }
+
+  .card {
+    @apply bg-off-white border border-border rounded-xl p-6;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium;
+  }
+
+  .page-title {
+    @apply font-serif text-4xl font-light text-charcoal tracking-tight mb-1;
+  }
+
+  .page-subtitle {
+    @apply text-muted text-sm tracking-wide;
+  }
+
+  .section-label {
+    @apply text-xs tracking-widest uppercase text-sage font-medium mb-4;
+  }
+}
