@@ -56,15 +56,15 @@ y trabajar en un único servicio sin necesidad de arrancar los demás.
 | Servicio | Puerto | Historias de usuario | Estado |
 |----------|--------|----------------------|--------|
 | `auth-service` | 3001 | HU-01, HU-02, HU-03 | ✅ Implementado |
-| `catalog-service` | 3002 | HU-07, HU-08, HU-09 | 🔲 Pendiente |
-| `customer-profile-service` | 3003 | HU-04, HU-05 | 🔲 Pendiente |
-| `promotions-service` | 3004 | HU-10, HU-11, HU-12, HU-13 | 🔲 Pendiente |
-| `cart-service` | 3005 | HU-14, HU-15, HU-16 | 🔲 Pendiente |
-| `order-service` | 3006 | HU-17, HU-18, HU-19, HU-21 | 🔲 Pendiente |
-| `notification-service` | 3007 | HU-17 | 🔲 Pendiente |
-| `invoice-service` | 3008 | HU-20 | 🔲 Pendiente |
-| `audit-service` | 3009 | HU-22 | 🔲 Pendiente |
-| `sap-integration-service` | 3010 | HU-23 | 🔲 Pendiente |
+| `catalog-service` | 3002 | HU-07, HU-08, HU-09 | ✅ Implementado |
+| `customer-profile-service` | 3003 | HU-04, HU-05 | ✅ Implementado |
+| `promotions-service` | 3004 | HU-10, HU-11, HU-12, HU-13 | ✅ Implementado |
+| `cart-service` | 3005 | HU-14, HU-15, HU-16 | ✅ Implementado |
+| `order-service` | 3006 | HU-17, HU-18, HU-19, HU-21 | ✅ Implementado |
+| `notification-service` | 3007 | HU-17 | ✅ Implementado |
+| `invoice-service` | 3008 | HU-20 | ✅ Implementado |
+| `audit-service` | 3009 | HU-22 | ✅ Implementado |
+| `sap-integration-service` | 3010 | HU-23 | ✅ Implementado |
 
 ---
 
