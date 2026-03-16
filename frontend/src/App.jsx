@@ -7,20 +7,7 @@ import { CatalogPage } from './pages/CatalogPage.jsx'
 import { ProductPage } from './pages/ProductPage.jsx'
 import { CartPage }    from './pages/CartPage.jsx'
 import { OrdersPage }  from './pages/OrdersPage.jsx'
-
-function ComingSoon ({ title }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-32 text-center">
-      <div className="w-16 h-16 bg-sage-light/30 rounded-full flex items-center justify-center mb-6">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A5740" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-        </svg>
-      </div>
-      <h2 className="font-serif text-3xl font-light text-charcoal mb-2">{title}</h2>
-      <p className="text-muted text-sm">Esta sección está en desarrollo · Próxima iteración</p>
-    </div>
-  )
-}
+import { AdminPage }   from './pages/AdminPage.jsx'
 
 export default function App () {
   return (
@@ -40,9 +27,8 @@ export default function App () {
         <Route path="/orders" element={
           <ProtectedRoute><Layout><OrdersPage /></Layout></ProtectedRoute>
         } />
-
         <Route path="/admin" element={
-          <ProtectedRoute adminOnly><Layout><ComingSoon title="Panel de administración" /></Layout></ProtectedRoute>
+          <ProtectedRoute adminOnly><Layout><AdminPage /></Layout></ProtectedRoute>
         } />
 
         <Route path="/" element={<Navigate to="/catalog" replace />} />
