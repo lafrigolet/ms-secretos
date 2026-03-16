@@ -27,7 +27,24 @@ services:
       - sda-network
     restart: unless-stopped
 
-  # ── Frontend (React + Vite) ─────────────────────────────────────
+  # ── Dev Stack Dashboard ─────────────────────────────────────────
+  dev-stack:
+    build:
+      context: ./dev-stack
+      dockerfile: Dockerfile
+    expose:
+      - "5174"
+    ports:
+      - "5174:5174"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./dev-stack/src:/app/src
+    networks:
+      - sda-network
+    restart: unless-stopped
+
+  # ── Frontend ─────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
