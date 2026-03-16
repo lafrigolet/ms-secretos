@@ -2,7 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 import { Layout } from './components/Layout.jsx'
-import { LoginPage } from './pages/LoginPage.jsx'
+import { LoginPage }   from './pages/LoginPage.jsx'
+import { CatalogPage } from './pages/CatalogPage.jsx'
+import { ProductPage } from './pages/ProductPage.jsx'
 
 // Páginas pendientes de implementar en siguientes iteraciones
 function ComingSoon ({ title }) {
@@ -27,44 +29,28 @@ export default function App () {
         {/* Pública */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Protegidas */}
+        {/* Catálogo */}
         <Route path="/catalog" element={
-          <ProtectedRoute>
-            <Layout><ComingSoon title="Catálogo de productos" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute><Layout><CatalogPage /></Layout></ProtectedRoute>
         } />
-
         <Route path="/catalog/:sapCode" element={
-          <ProtectedRoute>
-            <Layout><ComingSoon title="Ficha de producto" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute><Layout><ProductPage /></Layout></ProtectedRoute>
         } />
 
+        {/* Pendientes — próximas iteraciones */}
         <Route path="/cart" element={
-          <ProtectedRoute>
-            <Layout><ComingSoon title="Cesta de la compra" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute><Layout><ComingSoon title="Cesta de la compra" /></Layout></ProtectedRoute>
         } />
-
         <Route path="/orders" element={
-          <ProtectedRoute>
-            <Layout><ComingSoon title="Mis pedidos" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute><Layout><ComingSoon title="Mis pedidos" /></Layout></ProtectedRoute>
         } />
-
         <Route path="/orders/:orderId" element={
-          <ProtectedRoute>
-            <Layout><ComingSoon title="Detalle de pedido" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute><Layout><ComingSoon title="Detalle de pedido" /></Layout></ProtectedRoute>
         } />
-
         <Route path="/admin" element={
-          <ProtectedRoute adminOnly>
-            <Layout><ComingSoon title="Panel de administración" /></Layout>
-          </ProtectedRoute>
+          <ProtectedRoute adminOnly><Layout><ComingSoon title="Panel de administración" /></Layout></ProtectedRoute>
         } />
 
-        {/* Redireccionamiento */}
         <Route path="/" element={<Navigate to="/catalog" replace />} />
         <Route path="*" element={<Navigate to="/catalog" replace />} />
       </Routes>
