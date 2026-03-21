@@ -97,3 +97,47 @@ export class ProfileService {
     }
   }
 }
+
+  // HU-24 — Búsqueda por atributos
+  async searchCustomers (query) {
+    const all = await this.sap.getAllCustomers()
+    if (!query?.trim()) return all
+    const q = query.toLowerCase()
+    return all.filter(c =>
+      c.sapCode?.toLowerCase().includes(q) ||
+      c.name?.toLowerCase().includes(q) ||
+      c.businessName?.toLowerCase().includes(q) ||
+      c.city?.toLowerCase().includes(q) ||
+      c.postalCode?.includes(q) ||
+      c.email?.toLowerCase().includes(q)
+    )
+  }
+
+  // HU-25 — Filtrado avanzado
+  async filterCustomers ({ status, profile, city }) {
+    const all = await this.sap.getAllCustomers()
+    return all.filter(c => {
+      if (status  && c.status  !== status)  return false
+      if (profile && c.profile !== profile) return false
+      if (city    && !c.city?.toLowerCase().includes(city.toLowerCase())) return false
+      return true
+    })
+  }
+
+  // HU-27 — Ficha completa del cliente
+  async getFullProfile (sapCode) {
+    const customer = await this.sap.getCustomer(sapCode)
+    if (!customer) return null
+    const permissions = this.#buildPermissions(customer)
+    return { ...customer, ...permissions }
+  }
+
+  // HU-28 — Activar o bloquear cuenta
+  async updateStatus (sapCode, status, blockReason, adminSapCode) {
+    const customer = await this.sap.getCustomer(sapCode)
+    if (!customer) return { success: false, error: 'CUSTOMER_NOT_FOUND', message: 'Cliente no encontrado' }
+    if (!['ACTIVE', 'BLOCKED'].includes(status)) return { success: false, error: 'INVALID_STATUS', message: 'Estado inválido' }
+    const updated = await this.sap.updateStatus(sapCode, status, blockReason ?? null)
+    this.log.info({ sapCode, status, adminSapCode }, 'Estado de cuenta actualizado')
+    return { success: true, customer: updated }
+  }

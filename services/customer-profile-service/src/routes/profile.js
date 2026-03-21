@@ -137,3 +137,75 @@ export async function profileRoutes (fastify) {
     return reply.send({ sapCode, permission, allowed })
   })
 }
+
+  // ── GET /profile/search ────────────────────────────────────────
+  // HU-24 — Búsqueda de clientes por atributos
+  fastify.get('/search', {
+    preHandler: [fastify.authenticate, fastify.requireAdmin],
+    schema: {
+      description: 'Busca clientes por código SAP, nombre, tienda, ciudad o email (HU-24)',
+      tags: ['profile'],
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        required: ['q'],
+        properties: { q: { type: 'string', minLength: 1 } }
+      }
+    }
+  }, async (request, reply) => {
+    const results = await profileService.searchCustomers(request.query.q)
+    return reply.send(results)
+  })
+
+  // ── GET /profile/filter ────────────────────────────────────────
+  // HU-25 — Filtrado avanzado de clientes
+  fastify.get('/filter', {
+    preHandler: [fastify.authenticate, fastify.requireAdmin],
+    schema: {
+      description: 'Filtra clientes por estado, perfil o ciudad (HU-25)',
+      tags: ['profile'],
+      security: [{ bearerAuth: [] }],
+      querystring: {
+        type: 'object',
+        properties: {
+          status:  { type: 'string', enum: ['ACTIVE', 'BLOCKED'] },
+          profile: { type: 'string', enum: ['STANDARD', 'PREMIUM', 'VIP'] },
+          city:    { type: 'string' }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    const results = await profileService.filterCustomers(request.query)
+    return reply.send(results)
+  })
+
+  // ── PATCH /profile/:sapCode/status ────────────────────────────
+  // HU-28 — Activar o bloquear manualmente una cuenta
+  fastify.patch('/:sapCode/status', {
+    preHandler: [fastify.authenticate, fastify.requireAdmin],
+    schema: {
+      description: 'Activa o bloquea manualmente una cuenta de cliente (HU-28)',
+      tags: ['profile'],
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status:      { type: 'string', enum: ['ACTIVE', 'BLOCKED'] },
+          blockReason: { type: 'string', maxLength: 200 }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    const result = await profileService.updateStatus(
+      request.params.sapCode,
+      request.body.status,
+      request.body.blockReason,
+      request.user.sub
+    )
+    if (!result.success) {
+      return reply.status(result.error === 'CUSTOMER_NOT_FOUND' ? 404 : 400)
+        .send({ error: result.error, message: result.message })
+    }
+    return reply.send(result.customer)
+  })
