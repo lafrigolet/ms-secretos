@@ -65,6 +65,13 @@ export function Navbar () {
             }>
               Formación
             </NavLink>
+            <NavLink to="/intelligence" className={({ isActive }) =>
+              `text-sm px-3.5 py-2 rounded-md transition-colors ${isActive
+                ? 'text-sage-dark font-medium bg-sage-light/20'
+                : 'text-muted hover:text-sage-dark hover:bg-sage-light/20'}`
+            }>
+              Mis datos
+            </NavLink>
 
             {/* Cart button */}
             <button

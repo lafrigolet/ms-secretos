@@ -23,6 +23,7 @@ SERVICES=(
   sap-integration-service
   returns-service
   content-service
+  intelligence-service
 )
 
 # Si se pasa un argumento, ejecutar solo ese servicio

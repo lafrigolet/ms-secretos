@@ -14,6 +14,7 @@ const SERVICES = [
   { name: 'sap-integration-service',  healthUrl: '/api/sap-health',           docsUrl: 'http://localhost:3010/docs' },
   { name: 'returns-service',          healthUrl: '/api/returns-health',       docsUrl: 'http://localhost:3011/docs' },
   { name: 'content-service',          healthUrl: '/api/content-health',       docsUrl: 'http://localhost:3012/docs' },
+  { name: 'intelligence-service',     healthUrl: '/api/intelligence-health',  docsUrl: 'http://localhost:3013/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -300,6 +301,25 @@ function ContentSection ({ token }) {
   )
 }
 
+function IntelligenceSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>intelligence-service</h2>{hu('HU-40 · HU-41 · HU-42 · HU-43')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/intelligence/comparison?windowDays=90', 'GET', null, token)} disabled={loading || !token}>Comparativa 90d</button>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/intelligence/comparison?windowDays=30', 'GET', null, token)} disabled={loading || !token}>Comparativa 30d</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/intelligence/alerts/inactive-products?weeksThreshold=4', 'GET', null, token)} disabled={loading || !token}>Alertas 4 semanas</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/intelligence/alerts/inactive-products', 'GET', null, token)} disabled={loading || !token}>Alertas 8 semanas</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/intelligence/thresholds', 'GET', null, token)} disabled={loading || !token}>Umbrales beneficios</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/intelligence/benefits-summary?months=6', 'GET', null, token)} disabled={loading || !token}>Beneficios 6 meses</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -353,6 +373,7 @@ export default function App () {
       <OrdersSection token={token} />
       <ReturnsSection token={token} />
       <ContentSection token={token} />
+      <IntelligenceSection token={token} />
     </div>
   )
 }

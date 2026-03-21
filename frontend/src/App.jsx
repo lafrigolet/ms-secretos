@@ -10,7 +10,8 @@ import { OrdersPage }    from './pages/OrdersPage.jsx'
 import { AdminPage }     from './pages/AdminPage.jsx'
 import { ReturnsPage }   from './pages/ReturnsPage.jsx'
 import { NewReturnPage } from './pages/NewReturnPage.jsx'
-import { TrainingPage }  from './pages/TrainingPage.jsx'
+import { TrainingPage }     from './pages/TrainingPage.jsx'
+import { IntelligencePage } from './pages/IntelligencePage.jsx'
 
 export default function App () {
   return (
@@ -38,6 +39,9 @@ export default function App () {
         } />
         <Route path="/training" element={
           <ProtectedRoute><Layout><TrainingPage /></Layout></ProtectedRoute>
+        } />
+        <Route path="/intelligence" element={
+          <ProtectedRoute><Layout><IntelligencePage /></Layout></ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute adminOnly><Layout><AdminPage /></Layout></ProtectedRoute>
