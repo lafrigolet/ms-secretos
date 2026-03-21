@@ -52,6 +52,29 @@ services:
       - sda-network
     restart: unless-stopped
 
+  # ── Sustainability Service ────────────────────────────────────────
+  sustainability-service:
+    build:
+      context: ./services/sustainability-service
+      dockerfile: Dockerfile
+    expose:
+      - "3016"
+    ports:
+      - "3016:3016"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3016
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3016/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   # ── Notification Preferences Service ────────────────────────────
   notification-preferences-service:
     build:

@@ -17,6 +17,7 @@ const SERVICES = [
   { name: 'intelligence-service',     healthUrl: '/api/intelligence-health',  docsUrl: 'http://localhost:3013/docs' },
   { name: 'commercial-service',       healthUrl: '/api/commercial-health',    docsUrl: 'http://localhost:3014/docs' },
   { name: 'notification-preferences-service', healthUrl: '/api/notif-prefs-health', docsUrl: 'http://localhost:3015/docs' },
+  { name: 'sustainability-service',   healthUrl: '/api/sustainability-health', docsUrl: 'http://localhost:3016/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -362,6 +363,25 @@ function NotificationsSection ({ token }) {
   )
 }
 
+function SustainabilitySection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>sustainability-service</h2>{hu('HU-53 · HU-54 · HU-55')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/sustainability/products', 'GET', null, token)} disabled={loading || !token}>Todos productos (HU-53)</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/sustainability/products/P-RT-001', 'GET', null, token)} disabled={loading || !token}>Ficha P-RT-001 (HU-53)</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/sustainability/carbon-footprint', 'POST', { items: [{ productCode: 'P-RT-001', quantity: 6 }, { productCode: 'P-RT-002', quantity: 3 }], shippingMethod: 'STANDARD' }, token)} disabled={loading || !token}>Huella STANDARD (HU-54)</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/sustainability/carbon-footprint', 'POST', { items: [{ productCode: 'P-RT-001', quantity: 6 }], shippingMethod: 'ECO' }, token)} disabled={loading || !token}>Huella ECO (HU-54)</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/sustainability/grouping-preference', 'GET', null, token)} disabled={loading || !token}>Ver agrupación (HU-55)</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/sustainability/grouping-preference', 'PATCH', { acceptDelay: true, maxDelayDays: 5 }, token)} disabled={loading || !token}>Activar agrupación (HU-55)</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -418,6 +438,7 @@ export default function App () {
       <IntelligenceSection token={token} />
       <CommercialSection token={token} />
       <NotificationsSection token={token} />
+      <SustainabilitySection token={token} />
     </div>
   )
 }

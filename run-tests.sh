@@ -26,6 +26,7 @@ SERVICES=(
   intelligence-service
   commercial-service
   notification-preferences-service
+  sustainability-service
 )
 
 # Si se pasa un argumento, ejecutar solo ese servicio
