@@ -15,6 +15,7 @@ const SERVICES = [
   { name: 'returns-service',          healthUrl: '/api/returns-health',       docsUrl: 'http://localhost:3011/docs' },
   { name: 'content-service',          healthUrl: '/api/content-health',       docsUrl: 'http://localhost:3012/docs' },
   { name: 'intelligence-service',     healthUrl: '/api/intelligence-health',  docsUrl: 'http://localhost:3013/docs' },
+  { name: 'commercial-service',       healthUrl: '/api/commercial-health',    docsUrl: 'http://localhost:3014/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -320,6 +321,25 @@ function IntelligenceSection ({ token }) {
   )
 }
 
+function CommercialSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>commercial-service</h2>{hu('HU-44 · HU-45 · HU-46 · HU-47')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/commercial/my-commercial', 'GET', null, token)} disabled={loading || !token}>Mi comercial (HU-44)</button>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/commercial/suggested-orders', 'GET', null, token)} disabled={loading || !token}>Pedidos sugeridos (HU-45)</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/commercial/suggested-orders', 'POST', { sapCode: 'SDA-00423', message: 'Test dev-stack', items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 3, unitPrice: 16 }] }, token)} disabled={loading || !token}>Crear sugerido (HU-45)</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/commercial/portfolio', 'GET', null, token)} disabled={loading || !token}>Mi cartera (HU-46)</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/commercial/commercials', 'GET', null, token)} disabled={loading || !token}>Admin — comerciales (HU-47)</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/commercial/assignments', 'GET', null, token)} disabled={loading || !token}>Admin — asignaciones (HU-47)</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -374,6 +394,7 @@ export default function App () {
       <ReturnsSection token={token} />
       <ContentSection token={token} />
       <IntelligenceSection token={token} />
+      <CommercialSection token={token} />
     </div>
   )
 }

@@ -1,11 +1,4 @@
-# ══════════════════════════════════════════════════════════════════
-# Secretos del Agua — Docker Compose (desarrollo local)
-# ══════════════════════════════════════════════════════════════════
-#
-# Arrancar todo:              docker compose up --build
-# Solo auth + frontend:       docker compose up --build nginx frontend auth-service
-# Logs de un servicio:        docker compose logs -f auth-service
-# Reconstruir un servicio:    docker compose up --build auth-service
+version: '3.9'
 
 networks:
   sda-network:
@@ -13,7 +6,7 @@ networks:
 
 services:
 
-  # ── Nginx (reverse proxy) ───────────────────────────────────────
+  # ── Nginx ────────────────────────────────────────────────────────
   nginx:
     image: nginx:alpine
     ports:
@@ -59,7 +52,33 @@ services:
       - sda-network
     restart: unless-stopped
 
-  # ── Intelligence Service
+  # ── Commercial Service ───────────────────────────────────────────
+  commercial-service:
+    build:
+      context: ./services/commercial-service
+      dockerfile: Dockerfile
+    expose:
+      - "3014"
+    ports:
+      - "3014:3014"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3014
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+      - SAP_INTEGRATION_URL=${SAP_INTEGRATION_SERVICE_URL:-http://sap-integration-service:3010}
+    networks:
+      - sda-network
+    depends_on:
+      - sap-integration-service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3014/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── Intelligence Service ─────────────────────────────────────────
   intelligence-service:
     build:
       context: ./services/intelligence-service

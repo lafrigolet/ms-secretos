@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
-import { profileApi, promotionsApi, returnsApi, contentApi } from '../api/index.js'
+import { profileApi, promotionsApi, returnsApi, contentApi, commercialApi } from '../api/index.js'
 import { Spinner } from '../components/Spinner.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -394,6 +394,54 @@ function CustomersSection ({ onProfileChange }) {
   )
 }
 
+// ── HU-47 — Asignación de comerciales ────────────────────────────
+function CommercialAssignmentsSection () {
+  const { data: commercials }  = useAsync(() => commercialApi.getCommercials(), [])
+  const { data: assignments, refetch } = useAsync(() => commercialApi.getAssignments(), [])
+  const { data: profiles }     = useAsync(() => profileApi.getAll(), [])
+  const [saving, setSaving]    = useState(null)
+
+  async function handleAssign (sapCode, commercialId) {
+    setSaving(sapCode)
+    try { await commercialApi.assignCommercial(sapCode, commercialId); refetch() }
+    catch { alert('Error al asignar el comercial') }
+    finally { setSaving(null) }
+  }
+
+  const getAssignment = (sapCode) => assignments?.find(a => a.sapCode === sapCode)?.commercialId ?? ''
+  const customers = profiles?.filter(p => p.role !== 'ADMIN') ?? []
+
+  return (
+    <div className="card mt-6">
+      <p className="section-label mb-5">Asignación de comerciales</p>
+      {!customers.length && <div className="flex justify-center py-4"><Spinner /></div>}
+      <div className="space-y-2">
+        {customers.map(customer => (
+          <div key={customer.sapCode} className="flex items-center gap-4 py-2.5 border-b border-border last:border-0">
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${customer.status === 'ACTIVE' ? 'bg-sage' : 'bg-error'}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-charcoal">{customer.name}</p>
+              <p className="text-xs text-muted">{customer.sapCode}</p>
+            </div>
+            <select
+              value={getAssignment(customer.sapCode)}
+              onChange={e => handleAssign(customer.sapCode, e.target.value)}
+              disabled={saving === customer.sapCode || !commercials}
+              className="text-xs border border-border rounded-lg px-2 py-1.5 bg-cream text-charcoal outline-none cursor-pointer"
+            >
+              <option value="">Sin comercial</option>
+              {commercials?.map(c => (
+                <option key={c.id} value={c.id}>{c.name} · {c.zone}</option>
+              ))}
+            </select>
+            {saving === customer.sapCode && <Spinner size="sm" />}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── HU-39 — Gestión de contenidos ────────────────────────────────
 function ContentManagementSection () {
   const [tab, setTab]             = useState('datasheets')
@@ -739,6 +787,9 @@ export function AdminPage () {
           </div>
         </div>
       )}
+
+      {/* HU-47 — Asignación de comerciales */}
+      <CommercialAssignmentsSection />
 
       {/* HU-39 — Gestión de contenidos formativos */}
       <ContentManagementSection />

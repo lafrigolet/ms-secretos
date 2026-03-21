@@ -24,6 +24,7 @@ SERVICES=(
   returns-service
   content-service
   intelligence-service
+  commercial-service
 )
 
 # Si se pasa un argumento, ejecutar solo ese servicio
