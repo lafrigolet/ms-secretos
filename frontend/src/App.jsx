@@ -12,7 +12,8 @@ import { ReturnsPage }   from './pages/ReturnsPage.jsx'
 import { NewReturnPage } from './pages/NewReturnPage.jsx'
 import { TrainingPage }     from './pages/TrainingPage.jsx'
 import { IntelligencePage } from './pages/IntelligencePage.jsx'
-import { CommercialPage }   from './pages/CommercialPage.jsx'
+import { CommercialPage }     from './pages/CommercialPage.jsx'
+import { NotificationsPage } from './pages/NotificationsPage.jsx'
 
 export default function App () {
   return (
@@ -46,6 +47,9 @@ export default function App () {
         } />
         <Route path="/commercial" element={
           <ProtectedRoute><Layout><CommercialPage /></Layout></ProtectedRoute>
+        } />
+        <Route path="/notifications" element={
+          <ProtectedRoute><Layout><NotificationsPage /></Layout></ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute adminOnly><Layout><AdminPage /></Layout></ProtectedRoute>

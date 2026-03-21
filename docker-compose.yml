@@ -52,6 +52,29 @@ services:
       - sda-network
     restart: unless-stopped
 
+  # ── Notification Preferences Service ────────────────────────────
+  notification-preferences-service:
+    build:
+      context: ./services/notification-preferences-service
+      dockerfile: Dockerfile
+    expose:
+      - "3015"
+    ports:
+      - "3015:3015"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3015
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3015/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   # ── Commercial Service ───────────────────────────────────────────
   commercial-service:
     build:

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
-import { profileApi, promotionsApi, returnsApi, contentApi, commercialApi } from '../api/index.js'
+import { profileApi, promotionsApi, returnsApi, contentApi, commercialApi, notifApi } from '../api/index.js'
 import { Spinner } from '../components/Spinner.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -391,6 +391,123 @@ function CustomersSection ({ onProfileChange }) {
         />
       )}
     </>
+  )
+}
+
+// ── HU-52 — Comunicaciones segmentadas ───────────────────────────
+function BroadcastSection () {
+  const { data: broadcasts, refetch } = useAsync(() => notifApi.getBroadcasts(), [])
+  const [form, setForm]   = useState({ title: '', body: '', channel: 'EMAIL', segments: { profiles: ['STANDARD', 'PREMIUM', 'VIP'] } })
+  const [sending, setSending] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+
+  function toggleProfile (p) {
+    setForm(f => ({
+      ...f,
+      segments: {
+        ...f.segments,
+        profiles: f.segments.profiles.includes(p)
+          ? f.segments.profiles.filter(x => x !== p)
+          : [...f.segments.profiles, p]
+      }
+    }))
+  }
+
+  async function handleSend () {
+    if (!form.title.trim() || !form.body.trim()) return
+    setSending(true)
+    try {
+      await notifApi.sendBroadcast(form)
+      setForm({ title: '', body: '', channel: 'EMAIL', segments: { profiles: ['STANDARD', 'PREMIUM', 'VIP'] } })
+      setShowForm(false)
+      refetch()
+    } catch { alert('Error al enviar la comunicación') }
+    finally { setSending(false) }
+  }
+
+  return (
+    <div className="card mt-6">
+      <div className="flex items-center justify-between mb-5">
+        <p className="section-label mb-0">Comunicaciones segmentadas</p>
+        <button onClick={() => setShowForm(s => !s)}
+          className="bg-sage-dark text-off-white rounded-lg px-3.5 py-1.5 text-xs font-medium hover:bg-sage transition-colors border-0 cursor-pointer">
+          {showForm ? 'Cancelar' : '+ Nueva comunicación'}
+        </button>
+      </div>
+
+      {/* Formulario de envío */}
+      {showForm && (
+        <div className="bg-cream rounded-xl p-5 mb-5 border border-border">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="col-span-2">
+              <label className="form-label">Asunto</label>
+              <input type="text" className="form-input text-sm" placeholder="Ej: Novedades primavera 2025"
+                value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+            </div>
+            <div className="col-span-2">
+              <label className="form-label">Mensaje</label>
+              <textarea className="form-input text-sm resize-none" rows={3}
+                placeholder="Escribe el mensaje para tus clientes…"
+                value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))} />
+            </div>
+            <div>
+              <label className="form-label">Canal</label>
+              <select className="form-input text-sm" value={form.channel}
+                onChange={e => setForm(f => ({ ...f, channel: e.target.value }))}>
+                <option value="EMAIL">Email</option>
+                <option value="IN_APP">En la app</option>
+                <option value="PUSH">Push</option>
+              </select>
+            </div>
+            <div>
+              <label className="form-label">Perfiles destinatarios</label>
+              <div className="flex gap-2 mt-1">
+                {['STANDARD', 'PREMIUM', 'VIP'].map(p => (
+                  <button key={p} onClick={() => toggleProfile(p)}
+                    className={`flex-1 py-2 rounded-lg border text-xs transition-all ${
+                      form.segments.profiles.includes(p)
+                        ? 'bg-sage-dark text-off-white border-sage-dark'
+                        : 'bg-off-white text-muted border-border hover:border-sage'
+                    }`}>
+                    {p.charAt(0) + p.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button onClick={handleSend}
+            disabled={sending || !form.title.trim() || !form.body.trim() || form.segments.profiles.length === 0}
+            className="btn-primary text-sm flex items-center gap-2 disabled:opacity-50">
+            {sending ? <><Spinner size="sm" />Enviando…</> : '📢 Enviar comunicación'}
+          </button>
+        </div>
+      )}
+
+      {/* Historial de broadcasts */}
+      {broadcasts?.length === 0 && (
+        <p className="text-sm text-muted text-center py-4">Sin comunicaciones enviadas</p>
+      )}
+      <div className="space-y-2">
+        {broadcasts?.map(bc => (
+          <div key={bc.id} className="flex items-center gap-4 py-3 border-b border-border last:border-0">
+            <span className="text-xl">📢</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-charcoal truncate">{bc.title}</p>
+              <p className="text-xs text-muted">
+                {new Date(bc.sentAt).toLocaleDateString('es-ES')} · {bc.channel} · {bc.recipientCount} destinatarios
+              </p>
+            </div>
+            <div className="flex gap-1 flex-wrap justify-end">
+              {bc.segments?.profiles?.map(p => (
+                <span key={p} className="tag bg-cream text-muted text-[10px]">
+                  {p.charAt(0) + p.slice(1).toLowerCase()}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -787,6 +904,9 @@ export function AdminPage () {
           </div>
         </div>
       )}
+
+      {/* HU-52 — Comunicaciones segmentadas */}
+      <BroadcastSection />
 
       {/* HU-47 — Asignación de comerciales */}
       <CommercialAssignmentsSection />

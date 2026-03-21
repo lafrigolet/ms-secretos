@@ -16,6 +16,7 @@ const SERVICES = [
   { name: 'content-service',          healthUrl: '/api/content-health',       docsUrl: 'http://localhost:3012/docs' },
   { name: 'intelligence-service',     healthUrl: '/api/intelligence-health',  docsUrl: 'http://localhost:3013/docs' },
   { name: 'commercial-service',       healthUrl: '/api/commercial-health',    docsUrl: 'http://localhost:3014/docs' },
+  { name: 'notification-preferences-service', healthUrl: '/api/notif-prefs-health', docsUrl: 'http://localhost:3015/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -340,6 +341,27 @@ function CommercialSection ({ token }) {
   )
 }
 
+function NotificationsSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>notification-preferences-service</h2>{hu('HU-48 · HU-49 · HU-50 · HU-51 · HU-52')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/notifications/inbox', 'GET', null, token)} disabled={loading || !token}>Bandeja (HU-48)</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/notifications/preferences', 'GET', null, token)} disabled={loading || !token}>Preferencias (HU-51)</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/notifications/watchlist', 'GET', null, token)} disabled={loading || !token}>Watchlist stock (HU-48)</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/notifications/watchlist', 'POST', { productCode: 'P-TEST', productName: 'Producto Test' }, token)} disabled={loading || !token}>Añadir watchlist</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/notifications/alerts/expiring-promos', 'GET', null, token)} disabled={loading || !token}>Promos venciendo (HU-49)</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/notifications/alerts/check-min-order', 'POST', { cartTotal: 80 }, token)} disabled={loading || !token}>Check mínimo 80€ (HU-50)</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/notifications/broadcasts', 'GET', null, token)} disabled={loading || !token}>Admin — broadcasts (HU-52)</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/notifications/broadcasts', 'POST', { title: 'Test dev-stack', body: 'Mensaje de prueba', channel: 'IN_APP', segments: { profiles: ['PREMIUM'] } }, token)} disabled={loading || !token}>Admin — enviar broadcast</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -395,6 +417,7 @@ export default function App () {
       <ContentSection token={token} />
       <IntelligenceSection token={token} />
       <CommercialSection token={token} />
+      <NotificationsSection token={token} />
     </div>
   )
 }
