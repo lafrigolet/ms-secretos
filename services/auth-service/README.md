@@ -138,26 +138,3 @@ src/
 ## Puerto por defecto
 
 `3001` — cada microservicio usa un puerto distinto para poder arrancarlos todos localmente sin conflictos.
-
-## El flujo completo de un login
-
-Para aterrizar todo, esto es lo que pasa cuando el frontend hace `POST /auth/login`:
-```
-Navegador
-   │
-   │  POST /auth/login { sapCode: "SDA-00423", password: "demo1234" }
-   ▼
-schemas/auth.js         → valida que los campos existen y tienen el formato correcto
-   ▼
-routes/auth.js          → recibe la petición y llama a authService.login()
-   ▼
-services/authService.js → llama a sapIntegrationClient.verifyCredentials()
-   ▼
-sapIntegrationClient.js → (en dev) busca en STUB_CUSTOMERS y devuelve los datos
-   ▼
-services/authService.js → evalúa el resultado: ¿bloqueado? ¿credenciales malas? ¿OK?
-   ▼
-routes/auth.js          → genera el JWT con fastify.jwt.sign() y lo devuelve
-   ▼
-Navegador               ← { token: "eyJ...", customer: { name: "Rosa Canals", ... } }
-```

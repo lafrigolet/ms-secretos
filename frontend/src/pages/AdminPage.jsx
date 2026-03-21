@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
-import { profileApi, promotionsApi } from '../api/index.js'
+import { profileApi, promotionsApi, returnsApi } from '../api/index.js'
 import { Spinner } from '../components/Spinner.jsx'
 
 // ── Componentes auxiliares ────────────────────────────────────────
@@ -224,7 +224,15 @@ export function AdminPage () {
     () => promotionsApi.getAll(), []
   )
 
-  // HU-22 — estadísticas de auditoría (derivadas de los datos disponibles)
+  // HU-34 — devoluciones pendientes
+  const { data: pendingReturns, refetch: refetchReturns } = useAsync(
+    () => returnsApi.getAllReturns('PENDING'), []
+  )
+
+  async function handleUpdateReturn (id, status, adminNotes) {
+    await returnsApi.updateReturn(id, status, adminNotes)
+    refetchReturns()
+  }
   const activeCount  = profiles?.filter(p => p.status === 'ACTIVE').length ?? 0
   const blockedCount = profiles?.filter(p => p.status === 'BLOCKED').length ?? 0
 
@@ -246,7 +254,7 @@ export function AdminPage () {
       </div>
 
       {/* HU-22 — Estadísticas */}
-      <div className="grid grid-cols-3 gap-5 mb-10">
+      <div className="grid grid-cols-4 gap-5 mb-10">
         <StatCard
           label="Clientes activos"
           value={activeCount || '—'}
@@ -264,6 +272,12 @@ export function AdminPage () {
           value={blockedCount || 0}
           change={blockedCount > 0 ? '↑ Requieren atención' : '✓ Sin bloqueos activos'}
           up={blockedCount === 0}
+        />
+        <StatCard
+          label="Devoluciones pendientes"
+          value={pendingReturns?.length ?? '—'}
+          change={pendingReturns?.length > 0 ? '↑ Pendientes de revisión' : '✓ Sin pendientes'}
+          up={!pendingReturns?.length}
         />
       </div>
 
@@ -378,6 +392,59 @@ export function AdminPage () {
           </div>
         </div>
       </div>
+
+      {/* HU-34 — Devoluciones pendientes */}
+      {pendingReturns?.length > 0 && (
+        <div className="card mt-6">
+          <p className="section-label mb-5">Devoluciones pendientes de revisión</p>
+          <div className="space-y-3">
+            {pendingReturns.map(ret => (
+              <div key={ret.id} className="flex items-start gap-4 p-4 bg-cream rounded-xl">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-sm">{ret.id}</p>
+                    <span className="tag bg-[#F7F3E8] text-gold text-[10px]">Pendiente</span>
+                  </div>
+                  <p className="text-xs text-muted mb-1">
+                    {ret.sapCode} · Pedido {ret.orderId}
+                  </p>
+                  <p className="text-xs text-charcoal">
+                    {ret.reasonLabel}
+                    {ret.notes && <span className="text-muted"> — "{ret.notes}"</span>}
+                  </p>
+                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                    {ret.items?.map((item, i) => (
+                      <span key={i} className="tag bg-border/30 text-muted text-[10px]">
+                        {item.name} ×{item.quantity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => handleUpdateReturn(ret.id, 'REVIEWING')}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-border bg-off-white text-muted hover:border-sage hover:text-sage-dark transition-colors cursor-pointer"
+                  >
+                    Revisar
+                  </button>
+                  <button
+                    onClick={() => handleUpdateReturn(ret.id, 'APPROVED', 'Aprobada por administrador')}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-sage-dark text-off-white hover:bg-sage transition-colors cursor-pointer border-0"
+                  >
+                    Aprobar
+                  </button>
+                  <button
+                    onClick={() => handleUpdateReturn(ret.id, 'REJECTED', 'No cumple condiciones')}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-[#E8C5BF] bg-[#FDF0EE] text-error hover:bg-[#f5e0dc] transition-colors cursor-pointer"
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modales */}
       {editingCustomer && (

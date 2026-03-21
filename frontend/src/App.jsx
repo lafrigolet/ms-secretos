@@ -2,12 +2,14 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
 import { Layout } from './components/Layout.jsx'
-import { LoginPage }   from './pages/LoginPage.jsx'
-import { CatalogPage } from './pages/CatalogPage.jsx'
-import { ProductPage } from './pages/ProductPage.jsx'
-import { CartPage }    from './pages/CartPage.jsx'
-import { OrdersPage }  from './pages/OrdersPage.jsx'
-import { AdminPage }   from './pages/AdminPage.jsx'
+import { LoginPage }     from './pages/LoginPage.jsx'
+import { CatalogPage }   from './pages/CatalogPage.jsx'
+import { ProductPage }   from './pages/ProductPage.jsx'
+import { CartPage }      from './pages/CartPage.jsx'
+import { OrdersPage }    from './pages/OrdersPage.jsx'
+import { AdminPage }     from './pages/AdminPage.jsx'
+import { ReturnsPage }   from './pages/ReturnsPage.jsx'
+import { NewReturnPage } from './pages/NewReturnPage.jsx'
 
 export default function App () {
   return (
@@ -26,6 +28,12 @@ export default function App () {
         } />
         <Route path="/orders" element={
           <ProtectedRoute><Layout><OrdersPage /></Layout></ProtectedRoute>
+        } />
+        <Route path="/returns" element={
+          <ProtectedRoute><Layout><ReturnsPage /></Layout></ProtectedRoute>
+        } />
+        <Route path="/returns/new" element={
+          <ProtectedRoute><Layout><NewReturnPage /></Layout></ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute adminOnly><Layout><AdminPage /></Layout></ProtectedRoute>

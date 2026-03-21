@@ -12,6 +12,7 @@ const SERVICES = [
   { name: 'invoice-service',          healthUrl: '/api/invoices-health',      docsUrl: 'http://localhost:3008/docs' },
   { name: 'audit-service',            healthUrl: '/api/audit-health',         docsUrl: 'http://localhost:3009/docs' },
   { name: 'sap-integration-service',  healthUrl: '/api/sap-health',           docsUrl: 'http://localhost:3010/docs' },
+  { name: 'returns-service',          healthUrl: '/api/returns-health',       docsUrl: 'http://localhost:3011/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -259,6 +260,26 @@ function OrdersSection ({ token }) {
   )
 }
 
+function ReturnsSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>returns-service</h2>{hu('HU-31 · HU-32 · HU-33 · HU-34 · HU-35')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/returns/reasons')} disabled={loading}>Motivos</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/returns/', 'GET', null, token)} disabled={loading || !token}>Mis reclamaciones</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/returns/', 'POST', { orderId: 'SDA-2025-0890', reason: 'DAMAGED', notes: 'Test', items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 1, unitPrice: 16 }] }, token)} disabled={loading || !token}>Crear devolución</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/admin/returns/', 'GET', null, token)} disabled={loading || !token}>Admin — todas</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/admin/returns/?status=PENDING', 'GET', null, token)} disabled={loading || !token}>Admin — pendientes</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/admin/returns/RET-2025-001', 'PATCH', { status: 'APPROVED', adminNotes: 'Aprobada desde dev-stack' }, token)} disabled={loading || !token}>Aprobar RET-001 (→ SAP)</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -310,6 +331,7 @@ export default function App () {
       <PromotionsSection token={token} />
       <CartSection token={token} />
       <OrdersSection token={token} />
+      <ReturnsSection token={token} />
     </div>
   )
 }

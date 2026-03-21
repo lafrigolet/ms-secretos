@@ -186,6 +186,16 @@ export function OrdersPage () {
                             ↓
                           </IconBtn>
                         )}
+
+                        {/* HU-31 — Iniciar devolución (solo pedidos entregados) */}
+                        {order.status === 'DELIVERED' && (
+                          <IconBtn
+                            onClick={() => navigate('/returns/new', { state: { orderId: order.orderId } })}
+                            title="Solicitar devolución"
+                          >
+                            ↩
+                          </IconBtn>
+                        )}
                       </div>
                     </td>
                   </tr>
