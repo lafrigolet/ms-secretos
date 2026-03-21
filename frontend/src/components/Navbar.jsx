@@ -58,6 +58,13 @@ export function Navbar () {
             }>
               Devoluciones
             </NavLink>
+            <NavLink to="/training" className={({ isActive }) =>
+              `text-sm px-3.5 py-2 rounded-md transition-colors ${isActive
+                ? 'text-sage-dark font-medium bg-sage-light/20'
+                : 'text-muted hover:text-sage-dark hover:bg-sage-light/20'}`
+            }>
+              Formación
+            </NavLink>
 
             {/* Cart button */}
             <button

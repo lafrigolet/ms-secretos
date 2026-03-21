@@ -13,6 +13,7 @@ const SERVICES = [
   { name: 'audit-service',            healthUrl: '/api/audit-health',         docsUrl: 'http://localhost:3009/docs' },
   { name: 'sap-integration-service',  healthUrl: '/api/sap-health',           docsUrl: 'http://localhost:3010/docs' },
   { name: 'returns-service',          healthUrl: '/api/returns-health',       docsUrl: 'http://localhost:3011/docs' },
+  { name: 'content-service',          healthUrl: '/api/content-health',       docsUrl: 'http://localhost:3012/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -280,6 +281,25 @@ function ReturnsSection ({ token }) {
   )
 }
 
+function ContentSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>content-service</h2>{hu('HU-36 · HU-37 · HU-38 · HU-39')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/content/datasheets', 'GET', null, token)} disabled={loading || !token}>Fichas técnicas</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/content/videos', 'GET', null, token)} disabled={loading || !token}>Vídeos</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/content/news', 'GET', null, token)} disabled={loading || !token}>Novedades</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/content/news?featured=true', 'GET', null, token)} disabled={loading || !token}>Novedades destacadas</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/admin/content/datasheets', 'GET', null, token)} disabled={loading || !token}>Admin — fichas</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/admin/content/news', 'POST', { title: 'Test dev-stack', summary: 'Resumen test', featured: false }, token)} disabled={loading || !token}>Admin — crear noticia</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -332,6 +352,7 @@ export default function App () {
       <CartSection token={token} />
       <OrdersSection token={token} />
       <ReturnsSection token={token} />
+      <ContentSection token={token} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
-import { profileApi, promotionsApi, returnsApi } from '../api/index.js'
+import { profileApi, promotionsApi, returnsApi, contentApi } from '../api/index.js'
 import { Spinner } from '../components/Spinner.jsx'
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -394,6 +394,193 @@ function CustomersSection ({ onProfileChange }) {
   )
 }
 
+// ── HU-39 — Gestión de contenidos ────────────────────────────────
+function ContentManagementSection () {
+  const [tab, setTab]             = useState('datasheets')
+  const [showForm, setShowForm]   = useState(false)
+  const [formType, setFormType]   = useState(null)
+
+  const { data: datasheets, refetch: refetchDS } = useAsync(() => contentApi.adminGetDatasheets(), [])
+  const { data: videos,     refetch: refetchVid } = useAsync(() => contentApi.adminGetVideos(), [])
+  const { data: news,       refetch: refetchNews } = useAsync(() => contentApi.adminGetNews(), [])
+
+  async function toggleActive (type, id, current) {
+    if (type === 'datasheet') { await contentApi.adminUpdateDatasheet(id, { active: !current }); refetchDS() }
+    if (type === 'video')     { await contentApi.adminUpdateVideo(id,     { active: !current }); refetchVid() }
+    if (type === 'news')      { await contentApi.adminUpdateNews(id,      { active: !current }); refetchNews() }
+  }
+
+  async function toggleFeatured (id, current) {
+    await contentApi.adminUpdateNews(id, { featured: !current })
+    refetchNews()
+  }
+
+  const tabs = [
+    { key: 'datasheets', label: 'Fichas técnicas', count: datasheets?.length },
+    { key: 'videos',     label: 'Vídeos',          count: videos?.length },
+    { key: 'news',       label: 'Novedades',        count: news?.length },
+  ]
+
+  return (
+    <div className="card mt-6">
+      <div className="flex items-center justify-between mb-5">
+        <p className="section-label mb-0">Contenido formativo</p>
+        <button
+          onClick={() => { setFormType(tab); setShowForm(true) }}
+          className="bg-sage-dark text-off-white rounded-lg px-3.5 py-1.5 text-xs font-medium hover:bg-sage transition-colors border-0 cursor-pointer"
+        >
+          + Añadir
+        </button>
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="flex gap-1 mb-4 border-b border-border">
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
+              tab === t.key ? 'border-sage-dark text-sage-dark' : 'border-transparent text-muted hover:text-charcoal'
+            }`}
+          >
+            {t.label}
+            {t.count != null && <span className="ml-1.5 tag bg-cream text-muted text-[10px]">{t.count}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Fichas técnicas */}
+      {tab === 'datasheets' && (
+        <div className="space-y-2">
+          {datasheets?.map(ds => (
+            <div key={ds.id} className={`flex items-center gap-3 p-3 rounded-lg ${ds.active ? 'bg-cream' : 'bg-cream/40 opacity-60'}`}>
+              <span className="text-lg">📄</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-charcoal truncate">{ds.title}</p>
+                <p className="text-xs text-muted">{ds.fileType} · {ds.familyId ?? 'General'}</p>
+              </div>
+              <span className={`tag text-[10px] ${ds.active ? 'bg-[#EEF4EA] text-success' : 'bg-cream text-muted'}`}>
+                {ds.active ? 'Activa' : 'Retirada'}
+              </span>
+              <button onClick={() => toggleActive('datasheet', ds.id, ds.active)}
+                className="text-xs text-muted hover:text-charcoal border-0 bg-transparent cursor-pointer">
+                {ds.active ? 'Retirar' : 'Publicar'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Vídeos */}
+      {tab === 'videos' && (
+        <div className="space-y-2">
+          {videos?.map(vid => (
+            <div key={vid.id} className={`flex items-center gap-3 p-3 rounded-lg ${vid.active ? 'bg-cream' : 'bg-cream/40 opacity-60'}`}>
+              <span className="text-lg">🎬</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-charcoal truncate">{vid.title}</p>
+                <p className="text-xs text-muted">{vid.duration} · {vid.familyId ?? 'General'}</p>
+              </div>
+              <span className={`tag text-[10px] ${vid.active ? 'bg-[#EEF4EA] text-success' : 'bg-cream text-muted'}`}>
+                {vid.active ? 'Activo' : 'Retirado'}
+              </span>
+              <button onClick={() => toggleActive('video', vid.id, vid.active)}
+                className="text-xs text-muted hover:text-charcoal border-0 bg-transparent cursor-pointer">
+                {vid.active ? 'Retirar' : 'Publicar'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Novedades */}
+      {tab === 'news' && (
+        <div className="space-y-2">
+          {news?.map(item => (
+            <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg ${item.active ? 'bg-cream' : 'bg-cream/40 opacity-60'}`}>
+              <span className="text-lg">📢</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-charcoal truncate">{item.title}</p>
+                <p className="text-xs text-muted">{new Date(item.publishedAt).toLocaleDateString('es-ES')}</p>
+              </div>
+              {item.featured && <span className="tag bg-[#F7F3E8] text-gold text-[10px]">★</span>}
+              <button onClick={() => toggleFeatured(item.id, item.featured)}
+                className="text-xs text-muted hover:text-gold border-0 bg-transparent cursor-pointer">
+                {item.featured ? 'Quitar destacado' : 'Destacar'}
+              </button>
+              <button onClick={() => toggleActive('news', item.id, item.active)}
+                className="text-xs text-muted hover:text-charcoal border-0 bg-transparent cursor-pointer">
+                {item.active ? 'Retirar' : 'Publicar'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Formulario rápido de creación */}
+      {showForm && <QuickCreateForm type={formType} onClose={() => setShowForm(false)}
+        onSave={() => { setShowForm(false); refetchDS(); refetchVid(); refetchNews() }} />}
+    </div>
+  )
+}
+
+function QuickCreateForm ({ type, onClose, onSave }) {
+  const [form, setForm] = useState({ title: '', familyId: '', active: true })
+  const [saving, setSaving] = useState(false)
+
+  const labels = { datasheets: 'Ficha técnica', videos: 'Vídeo formativo', news: 'Novedad' }
+
+  async function handleSave () {
+    if (!form.title.trim()) return
+    setSaving(true)
+    try {
+      if (type === 'datasheets') await contentApi.adminCreateDatasheet({ ...form, fileType: 'PDF', downloadUrl: '#' })
+      if (type === 'videos')     await contentApi.adminCreateVideo({ ...form, videoUrl: form.videoUrl || '#', duration: form.duration || '—' })
+      if (type === 'news')       await contentApi.adminCreateNews({ ...form, summary: form.summary || form.title })
+      onSave()
+    } catch { alert('Error al crear el contenido') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <div className="mt-5 p-4 bg-cream rounded-xl border border-border">
+      <p className="text-sm font-medium text-charcoal mb-3">Nuevo {labels[type]}</p>
+      <div className="space-y-3">
+        <input type="text" className="form-input text-sm" placeholder="Título"
+          value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+        {type !== 'news' && (
+          <select className="form-input text-sm" value={form.familyId}
+            onChange={e => setForm(f => ({ ...f, familyId: e.target.value }))}>
+            <option value="">Familia (opcional)</option>
+            <option value="F01">✨ Ritual Timeless</option>
+            <option value="F02">🌿 Sensitivo</option>
+            <option value="F03">💧 Brillo & Nutrición</option>
+          </select>
+        )}
+        {type === 'videos' && (
+          <>
+            <input type="text" className="form-input text-sm" placeholder="URL del vídeo (YouTube embed)"
+              value={form.videoUrl || ''} onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))} />
+            <input type="text" className="form-input text-sm" placeholder="Duración (ej: 4:32)"
+              value={form.duration || ''} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} />
+          </>
+        )}
+        {type === 'news' && (
+          <textarea className="form-input text-sm resize-none" rows={2} placeholder="Resumen"
+            value={form.summary || ''} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} />
+        )}
+        <input type="text" className="form-input text-sm" placeholder="Descripción (opcional)"
+          value={form.description || ''} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+      </div>
+      <div className="flex gap-2 mt-3">
+        <button className="btn-secondary text-xs flex-1" onClick={onClose} disabled={saving}>Cancelar</button>
+        <button className="btn-primary text-xs flex-1 flex items-center justify-center gap-1"
+          onClick={handleSave} disabled={saving || !form.title.trim()}>
+          {saving ? <><Spinner size="sm" />Guardando…</> : 'Crear'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── AdminPage principal ───────────────────────────────────────────
 export function AdminPage () {
   const [showNewPromo, setShowNewPromo] = useState(false)
@@ -552,6 +739,9 @@ export function AdminPage () {
           </div>
         </div>
       )}
+
+      {/* HU-39 — Gestión de contenidos formativos */}
+      <ContentManagementSection />
 
       {showNewPromo && (
         <NewPromoModal onClose={() => setShowNewPromo(false)} onSave={refetchPromos} />

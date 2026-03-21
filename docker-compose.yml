@@ -54,10 +54,33 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
     volumes:
-      - ./frontend/src:/app/src        # hot-reload: cambios en src se reflejan al instante
+      - ./frontend/src:/app/src
     networks:
       - sda-network
     restart: unless-stopped
+
+  # ── Content Service ──────────────────────────────────────────────
+  content-service:
+    build:
+      context: ./services/content-service
+      dockerfile: Dockerfile
+    expose:
+      - "3012"
+    ports:
+      - "3012:3012"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3012
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3012/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # ── Returns Service ─────────────────────────────────────────────
   returns-service:
@@ -93,7 +116,7 @@ services:
     expose:
       - "3001"
     ports:
-      - "${AUTH_SERVICE_PORT:-3001}:3001"   # acceso directo para pruebas y /docs
+      - "${AUTH_SERVICE_PORT:-3001}:3001"
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - PORT=3001
@@ -136,7 +159,7 @@ services:
       timeout: 5s
       retries: 3
 
-  # ── Customer Profile Service ────────────────────────────────────
+  # ── Customer Profile Service ─────────────────────────────────────
   customer-profile-service:
     build:
       context: ./services/customer-profile-service
