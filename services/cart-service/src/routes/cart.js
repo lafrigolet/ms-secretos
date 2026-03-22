@@ -1,23 +1,23 @@
 import { PromotionsClient } from '../clients/PromotionsClient.js'
 
-const promotions = new PromotionsClient()
-
-const CARTS = new Map()
 const SHIPPING_THRESHOLD = 150
-const SHIPPING_COST = 8.50
-
-function getCart (sapCode) {
-  if (!CARTS.has(sapCode)) CARTS.set(sapCode, { items: [] })
-  return CARTS.get(sapCode)
-}
+const SHIPPING_COST      = 8.50
 
 function calculateTotals (items) {
   const subtotal = items.reduce((sum, i) => sum + (i.unitPrice * i.quantity), 0)
-  const shipping = subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
+  const shipping = items.length === 0 ? 0 : subtotal >= SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
   return { subtotal: +subtotal.toFixed(2), shipping, total: +(subtotal + shipping).toFixed(2) }
 }
 
 export async function cartRoutes (fastify) {
+  // Store local a cada instancia — los tests no se contaminan entre sí
+  const CARTS = new Map()
+  const promotions = new PromotionsClient()
+
+  function getCart (sapCode) {
+    if (!CARTS.has(sapCode)) CARTS.set(sapCode, { items: [] })
+    return CARTS.get(sapCode)
+  }
 
   fastify.get('/', {
     preHandler: [fastify.authenticate],
@@ -82,9 +82,9 @@ export async function cartRoutes (fastify) {
     preHandler: [fastify.authenticate],
     schema: { description: 'Resumen con totales, envío y beneficios (HU-15, HU-16)', tags: ['cart'], security: [{ bearerAuth: [] }] }
   }, async (request, reply) => {
-    const cart = getCart(request.user.sub)
+    const cart   = getCart(request.user.sub)
     const totals = calculateTotals(cart.items)
-    const token = request.headers.authorization?.replace('Bearer ', '')
+    const token  = request.headers.authorization?.replace('Bearer ', '')
     const benefits = await promotions.calculateBenefits(cart.items, totals.subtotal, token)
     return reply.send({
       items: cart.items, ...totals, benefits,

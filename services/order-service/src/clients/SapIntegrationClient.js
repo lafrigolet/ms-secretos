@@ -1,9 +1,27 @@
 import { HttpClient } from './HttpClient.js'
 
-/**
- * SapIntegrationClient — order-service
- * Gestiona pedidos y facturas a través del SAP Integration Service.
- */
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+
+const STUB_ORDERS = {
+  'SDA-00423': [
+    {
+      orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08',
+      status: 'SHIPPED', total: 96.00,
+      items: [{ productCode: 'P-RT-001', name: 'Champú Restaurador', quantity: 6, unitPrice: 16.00 }]
+    }
+  ]
+}
+
+const STUB_ORDER_BY_ID = {
+  'SDA-2025-0890': {
+    orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08',
+    status: 'SHIPPED', total: 96.00,
+    items: [{ productCode: 'P-RT-001', name: 'Champú Restaurador', quantity: 6, unitPrice: 16.00 }]
+  }
+}
+
+let stubCounter = 9000
+
 export class SapIntegrationClient {
   constructor () {
     this.http = new HttpClient(
@@ -12,7 +30,29 @@ export class SapIntegrationClient {
     )
   }
 
-  getOrders (sapCode)      { return this.http.get(`/internal/orders/${sapCode}`) }
-  getOrder (orderId)       { return this.http.get(`/internal/orders/order/${orderId}`) }
-  createOrder (sapCode, items) { return this.http.post('/internal/orders', { sapCode, items }) }
+  getOrders (sapCode) {
+    if (STUB_MODE) return Promise.resolve(STUB_ORDERS[sapCode] ?? [])
+    return this.http.get(`/internal/orders/${sapCode}`)
+  }
+
+  getOrder (orderId) {
+    if (STUB_MODE) return Promise.resolve(STUB_ORDER_BY_ID[orderId] ?? null)
+    return this.http.get(`/internal/orders/order/${orderId}`)
+  }
+
+  createOrder (sapCode, items) {
+    if (STUB_MODE) {
+      const total = items.reduce((s, i) => s + (i.unitPrice ?? 0) * i.quantity, 0)
+      const order = {
+        orderId: `SDA-2025-${String(++stubCounter)}`,
+        sapCode, date: new Date().toISOString().split('T')[0],
+        status: 'CONFIRMED', items, total
+      }
+      STUB_ORDER_BY_ID[order.orderId] = order
+      if (!STUB_ORDERS[sapCode]) STUB_ORDERS[sapCode] = []
+      STUB_ORDERS[sapCode].unshift(order)
+      return Promise.resolve(order)
+    }
+    return this.http.post('/internal/orders', { sapCode, items })
+  }
 }

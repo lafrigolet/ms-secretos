@@ -11,47 +11,6 @@ import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.NODE_ENV = 'development'
 process.env.JWT_SECRET = 'test-secret'
-process.env.SAP_INTEGRATION_URL = 'http://localhost:3010'
-
-// ── Mock de global.fetch ──────────────────────────────────────────
-// Los clientes en clients/SapIntegrationClient.js usan HttpClient,
-// que internamente usa fetch. Mockeamos fetch para interceptar
-// todas las llamadas al sap-integration-service.
-const FAMILIES = [
-  { id: 'F01', name: 'Ritual Timeless' },
-  { id: 'F02', name: 'Sensitivo' },
-  { id: 'F03', name: 'Brillo & Nutrición' }
-]
-const PRODUCTS = [
-  { sapCode: 'P-RT-001', familyId: 'F01', name: 'Champú Restaurador', format: '250ml', active: true },
-  { sapCode: 'P-RT-002', familyId: 'F01', name: 'Mascarilla Timeless', format: '200ml', active: true },
-  { sapCode: 'P-SN-001', familyId: 'F02', name: 'Champú Sensitivo', format: '250ml', active: true }
-]
-const PRICES  = { 'P-RT-001': 16.00, 'P-RT-002': 19.00, 'P-SN-001': 13.00 }
-const STOCK   = { 'P-RT-001': 240,   'P-RT-002': 0,      'P-SN-001': 310 }
-
-global.fetch = async (url) => {
-  const path = url.replace('http://localhost:3010', '')
-  if (path === '/internal/catalog/families')
-    return { ok: true, status: 200, json: async () => FAMILIES }
-  if (path === '/internal/catalog/products?familyId=F01')
-    return { ok: true, status: 200, json: async () => PRODUCTS.filter(p => p.familyId === 'F01') }
-  if (path === '/internal/catalog/products')
-    return { ok: true, status: 200, json: async () => PRODUCTS }
-  if (path === '/internal/catalog/products/P-RT-001')
-    return { ok: true, status: 200, json: async () => PRODUCTS[0] }
-  if (path === '/internal/catalog/products/NO-EXISTE')
-    return { ok: false, status: 404, json: async () => ({}) }
-  if (path === '/internal/catalog/prices/PREMIUM/P-RT-001')
-    return { ok: true, status: 200, json: async () => ({ price: 16.00 }) }
-  if (path === '/internal/catalog/prices/PREMIUM')
-    return { ok: true, status: 200, json: async () => PRICES }
-  if (path === '/internal/catalog/stock')
-    return { ok: true, status: 200, json: async () => STOCK }
-  if (path === '/internal/catalog/stock/P-RT-001')
-    return { ok: true, status: 200, json: async () => ({ stock: 240 }) }
-  return { ok: false, status: 404, json: async () => ({}) }
-}
 
 async function buildApp () {
   const app = Fastify({ logger: false })

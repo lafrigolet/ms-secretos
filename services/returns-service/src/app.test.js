@@ -13,17 +13,6 @@ import { errorHandler } from './middleware/errorHandler.js'
 process.env.JWT_SECRET  = 'test-secret'
 process.env.NODE_ENV    = 'development'
 
-// Mock fetch para SapIntegrationClient
-global.fetch = async (url) => {
-  if (url.includes('/internal/orders/order/SDA-2025-0890')) {
-    return { ok: true, json: async () => ({ orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', total: 96 }) }
-  }
-  if (url.includes('/internal/orders/order/NO-EXISTE')) {
-    return { ok: false, status: 404, json: async () => null }
-  }
-  return { ok: true, json: async () => ({}) }
-}
-
 async function buildApp () {
   const app = Fastify({ logger: false })
   await app.register(corsPlugin)

@@ -10,47 +10,7 @@ import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.JWT_SECRET = 'test-secret'
-process.env.SAP_INTEGRATION_URL = 'http://localhost:3010'
-
-// ── Mock de global.fetch ──────────────────────────────────────────
-// Intercepta llamadas de los tres clientes en clients/:
-//   - SapIntegrationClient  → sap-integration-service
-//   - NotificationClient    → notification-service (fire-and-forget, ignoramos)
-//   - AuditClient           → audit-service (fire-and-forget, ignoramos)
-const ORDERS = [
-  {
-    orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08',
-    status: 'SHIPPED', items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 6, unitPrice: 16.00 }], total: 96.00
-  }
-]
-
-global.fetch = async (url, opts) => {
-  const path = url
-    .replace('http://localhost:3010', '')
-    .replace('http://notification-service:3007', '')
-    .replace('http://audit-service:3009', '')
-
-  if (path === '/internal/orders/SDA-00423')
-    return { ok: true, json: async () => ORDERS }
-  if (path === '/internal/orders/order/SDA-2025-0890')
-    return { ok: true, json: async () => ORDERS[0] }
-  if (path === '/internal/orders/order/NO-EXISTE')
-    return { ok: false, status: 404, json: async () => null }
-  if (path === '/internal/orders' && opts?.method === 'POST') {
-    const body = JSON.parse(opts.body)
-    return {
-      ok: true,
-      json: async () => ({
-        orderId: 'SDA-2025-9999', sapCode: body.sapCode,
-        date: new Date().toISOString().split('T')[0],
-        status: 'CONFIRMED', items: body.items,
-        total: body.items.reduce((s, i) => s + i.unitPrice * i.quantity, 0)
-      })
-    }
-  }
-  // notification-service y audit-service: fire-and-forget, respondemos OK
-  return { ok: true, json: async () => ({}) }
-}
+process.env.NODE_ENV = 'development'
 
 async function buildApp () {
   const app = Fastify({ logger: false })

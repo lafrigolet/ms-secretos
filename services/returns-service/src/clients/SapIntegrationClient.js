@@ -38,6 +38,13 @@ export class SapIntegrationClient {
    * Obtiene un pedido para validar que pertenece al cliente antes de crear la devolución.
    */
   async getOrder (orderId) {
+    if (process.env.NODE_ENV !== 'production') {
+      const STUB_ORDERS = {
+        'SDA-2025-0890': { orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', total: 96 },
+        'SDA-2025-0812': { orderId: 'SDA-2025-0812', sapCode: 'SDA-00423', total: 289 },
+      }
+      return STUB_ORDERS[orderId] ?? null
+    }
     return this.http.get(`/internal/orders/order/${orderId}`)
   }
 }

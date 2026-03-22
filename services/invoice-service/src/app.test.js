@@ -10,30 +10,7 @@ import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.JWT_SECRET = 'test-secret'
-process.env.SAP_INTEGRATION_URL = 'http://localhost:3010'
-
-// ── Mock de global.fetch ──────────────────────────────────────────
-// clients/SapIntegrationClient.js usa HttpClient que internamente
-// usa fetch. Interceptamos las llamadas al sap-integration-service.
-const ORDERS = [
-  { orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', date: '2025-03-08', status: 'DELIVERED', total: 96.00, invoiceId: 'FAC-2025-0890' },
-  { orderId: 'SDA-2025-0812', sapCode: 'SDA-00423', date: '2025-02-21', status: 'DELIVERED', total: 289.00, invoiceId: 'FAC-2025-0812' }
-]
-const INVOICE = {
-  invoiceId: 'FAC-2025-0890', orderId: 'SDA-2025-0890', sapCode: 'SDA-00423',
-  date: '2025-03-08', total: 96.00,
-  items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 6, unitPrice: 16.00 }],
-  pdfUrl: '/invoices/FAC-2025-0890/download'
-}
-
-global.fetch = async (url) => {
-  const path = url.replace('http://localhost:3010', '')
-  if (path === '/internal/orders/SDA-00423') return { ok: true, json: async () => ORDERS }
-  if (path === '/internal/orders/SDA-OTRO')  return { ok: true, json: async () => [] }
-  if (path === '/internal/orders/invoice/FAC-2025-0890') return { ok: true, json: async () => INVOICE }
-  if (path === '/internal/orders/invoice/NO-EXISTE') return { ok: false, status: 404, json: async () => null }
-  return { ok: false, status: 404, json: async () => null }
-}
+process.env.NODE_ENV = 'development'
 
 async function buildApp () {
   const app = Fastify({ logger: false })

@@ -1,10 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
-/**
- * NotificationClient — order-service
- * Dispara notificaciones al notification-service de forma asíncrona.
- * Los errores se ignoran deliberadamente para no bloquear la confirmación del pedido.
- */
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+
 export class NotificationClient {
   constructor () {
     this.http = new HttpClient(
@@ -13,12 +10,9 @@ export class NotificationClient {
     )
   }
 
-  /**
-   * Notifica la confirmación de un pedido.
-   * Fire-and-forget: no esperamos la respuesta ni propagamos errores.
-   */
   orderConfirmed (order, user) {
+    if (STUB_MODE) return  // en tests no disparamos notificaciones
     this.http.post('/notifications/order-confirmed', { order, user })
-      .catch(() => {}) // intencional — no bloquear el flujo del pedido
+      .catch(() => {})
   }
 }

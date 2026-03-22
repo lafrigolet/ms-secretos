@@ -1,10 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
-/**
- * AuditClient — order-service
- * Registra eventos de auditoría en el audit-service.
- * Fire-and-forget: nunca bloquea el flujo principal.
- */
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+
 export class AuditClient {
   constructor () {
     this.http = new HttpClient(
@@ -14,7 +11,8 @@ export class AuditClient {
   }
 
   log (action, sapCode, data = {}) {
+    if (STUB_MODE) return  // en tests no auditamos
     this.http.post('/audit', { action, sapCode, data })
-      .catch(() => {}) // intencional — la auditoría nunca debe romper el flujo
+      .catch(() => {})
   }
 }

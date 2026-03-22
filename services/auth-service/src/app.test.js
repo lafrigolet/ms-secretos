@@ -6,10 +6,10 @@ import corsPlugin from '@fastify/cors'
 import swaggerPlugin from '@fastify/swagger'
 import swaggerUiPlugin from '@fastify/swagger-ui'
 
-import { authRoutes } from '../routes/auth.js'
-import { healthRoutes } from '../routes/health.js'
-import { registerAuthDecorator } from '../middleware/authenticate.js'
-import { errorHandler } from '../middleware/errorHandler.js'
+import { authRoutes } from './routes/auth.js'
+import { healthRoutes } from './routes/health.js'
+import { registerAuthDecorator } from './middleware/authenticate.js'
+import { errorHandler } from './middleware/errorHandler.js'
 
 // ── Setup ─────────────────────────────────────────────────────────
 process.env.NODE_ENV = 'development'  // activa el STUB en clients/SapIntegrationClient.js
@@ -215,7 +215,7 @@ describe('Credenciales incorrectas', () => {
     const res = await app.inject({
       method: 'POST',
       url: '/auth/login',
-      payload: { sapCode: 'SDA-00423', password: 'mal' }
+      payload: { sapCode: 'SDA-00423', password: 'wrongpassword' }
     })
     assert.equal(res.statusCode, 401)
     assert.equal(res.json().error, 'INVALID_CREDENTIALS')

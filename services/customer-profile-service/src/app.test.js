@@ -6,11 +6,11 @@ import corsPlugin from '@fastify/cors'
 import swaggerPlugin from '@fastify/swagger'
 import swaggerUiPlugin from '@fastify/swagger-ui'
 
-import { ProfileService } from '../services/ProfileService.js'
-import { profileRoutes } from '../routes/profile.js'
-import { healthRoutes } from '../routes/health.js'
-import { registerAuthDecorators } from '../middleware/authenticate.js'
-import { errorHandler } from '../middleware/errorHandler.js'
+import { ProfileService } from './services/ProfileService.js'
+import { profileRoutes } from './routes/profile.js'
+import { healthRoutes } from './routes/health.js'
+import { registerAuthDecorators } from './middleware/authenticate.js'
+import { errorHandler } from './middleware/errorHandler.js'
 
 // ── Setup ─────────────────────────────────────────────────────────
 // NODE_ENV=development activa el STUB en clients/SapIntegrationClient.js
