@@ -8,8 +8,9 @@ import swaggerUiPlugin from '@fastify/swagger-ui'
 import { SapService } from './services/SapService.js'
 import { customerRoutes } from './routes/customers.js'
 import { catalogRoutes } from './routes/catalog.js'
-import { orderRoutes } from './routes/orders.js'
-import { healthRoutes } from './routes/health.js'
+import { orderRoutes }   from './routes/orders.js'
+import { returnsRoutes } from './routes/returns.js'
+import { healthRoutes }  from './routes/health.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 // ── Setup ─────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ async function buildApp () {
   await app.register(customerRoutes, { prefix: '/internal/customers' })
   await app.register(catalogRoutes,  { prefix: '/internal/catalog' })
   await app.register(orderRoutes,    { prefix: '/internal/orders' })
+  await app.register(returnsRoutes,  { prefix: '/internal/returns' })
   await app.register(healthRoutes,   { prefix: '/health' })
   return app
 }
@@ -365,5 +367,100 @@ describe('Orders', () => {
     const res = await app.inject({ method: 'GET', url: '/internal/orders/invoice/FAC-NO-EXISTE' })
     assert.equal(res.statusCode, 404)
     assert.equal(res.json().error, 'INVOICE_NOT_FOUND')
+  })
+})
+
+describe('PATCH /internal/customers — actualizar perfil y estado (HU-05, HU-28)', () => {
+  test('PATCH /:sapCode — actualiza el perfil de un cliente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/internal/customers/SDA-00387',
+      payload: { profile: 'PREMIUM' }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().profile, 'PREMIUM')
+    assert.equal(res.json().sapCode, 'SDA-00387')
+  })
+
+  test('PATCH /:sapCode — cliente no existente devuelve 404', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/internal/customers/NO-EXISTE',
+      payload: { profile: 'PREMIUM' }
+    })
+    assert.equal(res.statusCode, 404)
+  })
+
+  test('PATCH /:sapCode/status — bloquea una cuenta', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/internal/customers/SDA-00387/status',
+      payload: { status: 'BLOCKED', blockReason: 'DEBT' }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().status, 'BLOCKED')
+    assert.equal(res.json().blockReason, 'DEBT')
+  })
+
+  test('PATCH /:sapCode/status — activa una cuenta', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'PATCH', url: '/internal/customers/SDA-00187/status',
+      payload: { status: 'ACTIVE' }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().status, 'ACTIVE')
+  })
+})
+
+describe('GET /internal/orders/:sapCode/benefits (HU-43)', () => {
+  test('devuelve los beneficios acumulados de un cliente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: '/internal/orders/SDA-00423/benefits' })
+    assert.equal(res.statusCode, 200)
+    assert.ok(Array.isArray(res.json()))
+    assert.ok(res.json().length > 0)
+    const b = res.json()[0]
+    assert.ok(b.promoName)
+    assert.ok(b.benefit?.type)
+    assert.ok(b.date)
+  })
+
+  test('cliente sin beneficios devuelve array vacío', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: '/internal/orders/SDA-00521/benefits' })
+    assert.equal(res.statusCode, 200)
+    assert.deepEqual(res.json(), [])
+  })
+})
+
+describe('POST /internal/returns/credit-note (HU-35)', () => {
+  test('crea una nota de crédito correctamente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: '/internal/returns/credit-note',
+      payload: {
+        returnId: 'RET-001',
+        orderId:  'SDA-2025-0890',
+        sapCode:  'SDA-00423',
+        items: [{ productCode: 'P-RT-001', name: 'Champú Restaurador', quantity: 2 }]
+      }
+    })
+    assert.equal(res.statusCode, 201)
+    const body = res.json()
+    assert.ok(body.creditNoteId)
+    assert.equal(body.returnId, 'RET-001')
+    assert.equal(body.sapCode, 'SDA-00423')
+    assert.equal(body.status, 'CREATED')
+    assert.ok(body.createdAt)
+  })
+
+  test('body inválido devuelve 400', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: '/internal/returns/credit-note',
+      payload: { returnId: 'RET-001' }
+    })
+    assert.equal(res.statusCode, 400)
   })
 })

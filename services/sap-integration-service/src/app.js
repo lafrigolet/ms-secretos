@@ -7,7 +7,8 @@ import swaggerUiPlugin from '@fastify/swagger-ui'
 import { SapService } from './services/SapService.js'
 import { customerRoutes } from './routes/customers.js'
 import { catalogRoutes } from './routes/catalog.js'
-import { orderRoutes } from './routes/orders.js'
+import { orderRoutes }   from './routes/orders.js'
+import { returnsRoutes } from './routes/returns.js'
 import { healthRoutes } from './routes/health.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
@@ -54,6 +55,7 @@ app.setErrorHandler(errorHandler)
 await app.register(customerRoutes, { prefix: '/internal/customers' })
 await app.register(catalogRoutes,  { prefix: '/internal/catalog' })
 await app.register(orderRoutes,    { prefix: '/internal/orders' })
+await app.register(returnsRoutes,  { prefix: '/internal/returns' })
 await app.register(healthRoutes,   { prefix: '/health' })
 
 // ── Arranque ──────────────────────────────────────────────────────

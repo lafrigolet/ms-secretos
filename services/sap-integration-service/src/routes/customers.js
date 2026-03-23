@@ -43,7 +43,7 @@ export async function customerRoutes (fastify) {
     return reply.send(customer)
   })
 
-  // Obtener todos los clientes (usado por admin-service)
+  // Obtener todos los clientes (usado por customer-profile-service)
   fastify.get('/', {
     schema: {
       description: 'Lista todos los clientes',
@@ -52,5 +52,50 @@ export async function customerRoutes (fastify) {
   }, async (_request, reply) => {
     const customers = await sap.getAllCustomers()
     return reply.send(customers)
+  })
+
+  // Actualizar perfil de un cliente (HU-05)
+  fastify.patch('/:sapCode', {
+    schema: {
+      description: 'Actualiza el perfil de un cliente',
+      tags: ['customers'],
+      params: { type: 'object', properties: { sapCode: { type: 'string' } } },
+      body: {
+        type: 'object',
+        required: ['profile'],
+        properties: {
+          profile: { type: 'string', enum: ['STANDARD', 'PREMIUM', 'VIP'] }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    const customer = await sap.updateProfile(request.params.sapCode, request.body.profile)
+    if (!customer) return reply.status(404).send({ error: 'CUSTOMER_NOT_FOUND', message: 'Cliente no encontrado' })
+    return reply.send(customer)
+  })
+
+  // Activar o bloquear cuenta (HU-28)
+  fastify.patch('/:sapCode/status', {
+    schema: {
+      description: 'Activa o bloquea la cuenta de un cliente',
+      tags: ['customers'],
+      params: { type: 'object', properties: { sapCode: { type: 'string' } } },
+      body: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status:      { type: 'string', enum: ['ACTIVE', 'BLOCKED'] },
+          blockReason: { type: 'string' }
+        }
+      }
+    }
+  }, async (request, reply) => {
+    const customer = await sap.updateStatus(
+      request.params.sapCode,
+      request.body.status,
+      request.body.blockReason ?? null
+    )
+    if (!customer) return reply.status(404).send({ error: 'CUSTOMER_NOT_FOUND', message: 'Cliente no encontrado' })
+    return reply.send(customer)
   })
 }

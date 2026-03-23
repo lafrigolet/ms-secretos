@@ -187,5 +187,6 @@ export async function profileRoutes (fastify) {
     }
     return reply.send(result.customer)
   })
-}
 
+  // ── POST /profile/check-permission está definido antes de /:sapCode ──
+}

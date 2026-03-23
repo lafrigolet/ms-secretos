@@ -7,17 +7,17 @@ const KNOWN_PRODUCTS = ['P-RT-001', 'P-RT-002', 'P-RT-003', 'P-SN-001', 'P-BN-00
 
 // Umbrales de beneficios del promotions-service (en producción se consultaría)
 const BENEFIT_THRESHOLDS = [
-  { threshold: 100,  label: 'Muestra gratis',             type: 'SAMPLE' },
-  { threshold: 200,  label: 'Envío prioritario',           type: 'SHIPPING' },
-  { threshold: 350,  label: 'Tester exclusivo',            type: 'GIFT' },
-  { threshold: 500,  label: 'Descuento 10% próx. pedido',  type: 'DISCOUNT' },
+  { threshold: 100,  label: 'Muestra gratis',          type: 'SAMPLE' },
+  { threshold: 200,  label: 'Envío prioritario',        type: 'SHIPPING' },
+  { threshold: 350,  label: 'Tester exclusivo',          type: 'GIFT' },
+  { threshold: 500,  label: 'Descuento 10% próx. pedido', type: 'DISCOUNT' },
 ]
 
 /**
  * Divide los pedidos en periodo actual y anterior según días de ventana.
  */
 function splitByPeriod (orders, windowDays = 90) {
-  const now         = new Date()
+  const now      = new Date()
   const cutCurrent  = new Date(now); cutCurrent.setDate(now.getDate() - windowDays)
   const cutPrevious = new Date(now); cutPrevious.setDate(now.getDate() - windowDays * 2)
 
@@ -51,18 +51,22 @@ export async function intelligenceRoutes (fastify) {
     const orders     = await sap.getOrders(sapCode)
     const { current, previous } = splitByPeriod(orders, windowDays)
 
-    const currentTotal   = current.reduce((s, o)  => s + o.total, 0)
-    const previousTotal  = previous.reduce((s, o) => s + o.total, 0)
+    const currentTotal  = current.reduce((s, o)  => s + o.total, 0)
+    const previousTotal = previous.reduce((s, o) => s + o.total, 0)
     const currentOrders  = current.length
     const previousOrders = previous.length
 
     const totalChange  = previousTotal  > 0 ? ((currentTotal  - previousTotal)  / previousTotal)  * 100 : null
     const ordersChange = previousOrders > 0 ? ((currentOrders - previousOrders) / previousOrders) * 100 : null
 
+    // Productos más comprados en cada periodo
+    const topProductsCurrent = topProducts(current)
+    const topProductsPrevious = topProducts(previous)
+
     return reply.send({
       windowDays,
-      current:  { total: +currentTotal.toFixed(2),  orders: currentOrders,  topProducts: topProducts(current) },
-      previous: { total: +previousTotal.toFixed(2), orders: previousOrders, topProducts: topProducts(previous) },
+      current:  { total: +currentTotal.toFixed(2),  orders: currentOrders,  topProducts: topProductsCurrent },
+      previous: { total: +previousTotal.toFixed(2), orders: previousOrders, topProducts: topProductsPrevious },
       changes: {
         totalAmount:  totalChange  != null ? +totalChange.toFixed(1)  : null,
         totalOrders:  ordersChange != null ? +ordersChange.toFixed(1) : null,
@@ -92,9 +96,11 @@ export async function intelligenceRoutes (fastify) {
 
     if (orders.length === 0) return reply.send({ alerts: [], weeksThreshold })
 
+    // Fecha de corte: productos no pedidos desde hace X semanas
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - weeksThreshold * 7)
 
+    // Todos los productos pedidos históricamente
     const productHistory = {}
     for (const order of orders) {
       for (const item of order.items ?? []) {
@@ -108,6 +114,7 @@ export async function intelligenceRoutes (fastify) {
       }
     }
 
+    // Productos con historial pero sin pedido reciente
     const alerts = Object.values(productHistory)
       .filter(p => p.orderCount >= 2 && new Date(p.lastOrderDate) < cutoff)
       .map(p => ({
@@ -131,9 +138,9 @@ export async function intelligenceRoutes (fastify) {
       security: [{ bearerAuth: [] }]
     }
   }, async (request, reply) => {
-    const sapCode    = request.user.sub
-    const orders     = await sap.getOrders(sapCode)
-    const { current } = splitByPeriod(orders, 30)
+    const sapCode = request.user.sub
+    const orders  = await sap.getOrders(sapCode)
+    const { current } = splitByPeriod(orders, 30) // ventana de 30 días
     const currentSpend = current.reduce((s, o) => s + o.total, 0)
 
     const reached = BENEFIT_THRESHOLDS.filter(t => currentSpend >= t.threshold)
@@ -172,8 +179,8 @@ export async function intelligenceRoutes (fastify) {
       }
     }
   }, async (request, reply) => {
-    const sapCode  = request.user.sub
-    const months   = request.query.months ?? 6
+    const sapCode = request.user.sub
+    const months  = request.query.months ?? 6
     const benefits = await sap.getBenefits(sapCode)
 
     const cutoff = new Date()

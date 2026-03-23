@@ -155,6 +155,29 @@ export class SapService {
     }
   }
 
+  async updateProfile (sapCode, profile) {
+    const result = await this.adapter.updateProfile(sapCode, profile)
+    // Invalidar caché del cliente al modificar su perfil
+    this.cache.delete(`customer:${sapCode}`)
+    this.cache.delete('customers')
+    return result
+  }
+
+  async updateStatus (sapCode, status, blockReason = null) {
+    const result = await this.adapter.updateStatus(sapCode, status, blockReason)
+    this.cache.delete(`customer:${sapCode}`)
+    this.cache.delete('customers')
+    return result
+  }
+
+  async getBenefits (sapCode) {
+    return this.adapter.getBenefits(sapCode)
+  }
+
+  async createCreditNote (data) {
+    return this.adapter.createCreditNote(data)
+  }
+
   invalidateAll () {
     this.cache.clear()
     this.log.info('Caché invalidada completamente')

@@ -122,6 +122,41 @@ export class StubAdapter {
     }
   }
 
+  async updateProfile (sapCode, profile) {
+    const customer = CUSTOMERS.find(c => c.sapCode === sapCode)
+    if (!customer) return null
+    customer.profile = profile
+    const { password, ...safeCustomer } = customer
+    return safeCustomer
+  }
+
+  async updateStatus (sapCode, status, blockReason = null) {
+    const customer = CUSTOMERS.find(c => c.sapCode === sapCode)
+    if (!customer) return null
+    customer.status = status
+    customer.blockReason = blockReason
+    const { password, ...safeCustomer } = customer
+    return safeCustomer
+  }
+
+  async getBenefits (sapCode) {
+    return ORDERS
+      .filter(o => o.sapCode === sapCode && o.benefits?.length)
+      .flatMap(o => o.benefits.map(b => ({ ...b, orderId: o.orderId, date: o.date })))
+  }
+
+  async createCreditNote ({ returnId, orderId, sapCode, items }) {
+    return {
+      creditNoteId: `CN-${new Date().getFullYear()}-${returnId.split('-').pop()}`,
+      returnId,
+      orderId,
+      sapCode,
+      items,
+      status: 'CREATED',
+      createdAt: new Date().toISOString()
+    }
+  }
+
   // ── Facturas ─────────────────────────────────────────────────────
 
   async getInvoice (invoiceId) {

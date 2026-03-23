@@ -233,16 +233,18 @@ export class ODataAdapter {
 
   #mapCustomer (c) {
     return {
-      sapCode: c.CustomerCode,
-      name: c.Name,
+      sapCode:      c.SapCode ?? c.CustomerCode,
+      name:         c.Name,
       businessName: c.BusinessName,
-      email: c.Email,
-      phone: c.Phone,
-      profile: c.Profile,
-      role: c.Role ?? 'CUSTOMER',
-      status: c.Status,
-      blockReason: c.BlockReason ?? null,
-      creditLimit: c.CreditLimit,
+      email:        c.Email,
+      phone:        c.Phone ?? null,
+      city:         c.City ?? null,
+      postalCode:   c.PostalCode ?? null,
+      profile:      c.Profile,
+      role:         c.Role ?? 'CUSTOMER',
+      status:       c.Status,
+      blockReason:  c.BlockReason ?? null,
+      creditLimit:  c.CreditLimit,
       paymentTerms: c.PaymentTerms
     }
   }
@@ -256,6 +258,59 @@ export class ODataAdapter {
       format: p.Format,
       imageUrl: p.ImageUrl ?? null,
       active: p.Active === 'X'   // SAP usa 'X' para true
+    }
+  }
+
+  async updateProfile (sapCode, profile) {
+    const result = await this.#fetch(`/ZSD_CUSTOMERS_SRV/Customers('${sapCode}')`, {
+      method: 'PATCH',
+      body: JSON.stringify({ Profile: profile })
+    })
+    return this.#mapCustomer(result)
+  }
+
+  async updateStatus (sapCode, status, blockReason = null) {
+    const result = await this.#fetch(`/ZSD_CUSTOMERS_SRV/Customers('${sapCode}')/Status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ Status: status, BlockReason: blockReason ?? '' })
+    })
+    return this.#mapCustomer(result)
+  }
+
+  async getBenefits (sapCode) {
+    const data = await this.#fetch(`/ZSD_ORDERS_SRV/Benefits?$filter=CustomerCode eq '${sapCode}'`)
+    return (data?.value ?? []).map(b => ({
+      date:       b.Date,
+      orderId:    b.OrderId,
+      promoName:  b.PromoName,
+      benefit: {
+        type:        b.BenefitType,
+        description: b.BenefitDescription
+      }
+    }))
+  }
+
+  async createCreditNote ({ returnId, orderId, sapCode, items }) {
+    const result = await this.#fetch('/ZSD_RETURNS_SRV/CreditNotes', {
+      method: 'POST',
+      body: JSON.stringify({
+        ReturnId: returnId,
+        OrderId:  orderId,
+        CustomerCode: sapCode,
+        Items: items.map(i => ({
+          ProductCode: i.productCode,
+          Quantity:    i.quantity,
+          Reason:      i.reason ?? ''
+        }))
+      })
+    })
+    return {
+      creditNoteId: result.CreditNoteId,
+      returnId,
+      orderId,
+      sapCode,
+      status:    result.Status,
+      createdAt: result.CreatedAt
     }
   }
 

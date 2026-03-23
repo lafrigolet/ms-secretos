@@ -212,7 +212,10 @@ export const ORDERS = [
     subtotal: 134.00,
     shipping: 0,
     total: 134.00,
-    invoiceId: 'FAC-2025-0890'
+    invoiceId: 'FAC-2025-0890',
+    benefits: [
+      { promoName: 'Promo Otoño — Ritual Timeless', benefit: { type: 'SAMPLE', description: 'Muestra Sérum Raíces 15ml' } }
+    ]
   },
   {
     orderId: 'SDA-2025-0812',
@@ -227,7 +230,10 @@ export const ORDERS = [
     subtotal: 289.00,
     shipping: 0,
     total: 289.00,
-    invoiceId: 'FAC-2025-0812'
+    invoiceId: 'FAC-2025-0812',
+    benefits: [
+      { promoName: 'Tester Aceite Brillo ≥250€', benefit: { type: 'GIFT', description: 'Tester Aceite Brillo Argán 30ml' } }
+    ]
   },
   {
     orderId: 'SDA-2025-0744',
@@ -241,7 +247,10 @@ export const ORDERS = [
     subtotal: 252.00,
     shipping: 0,
     total: 252.00,
-    invoiceId: 'FAC-2025-0744'
+    invoiceId: 'FAC-2025-0744',
+    benefits: [
+      { promoName: 'Promo Otoño — Ritual Timeless', benefit: { type: 'SAMPLE', description: 'Muestra Sérum Raíces 15ml' } }
+    ]
   },
   {
     orderId: 'SDA-2025-0651',
@@ -256,7 +265,10 @@ export const ORDERS = [
     subtotal: 303.50,
     shipping: 0,
     total: 303.50,
-    invoiceId: 'FAC-2025-0651'
+    invoiceId: 'FAC-2025-0651',
+    benefits: [
+      { promoName: 'Descuento fidelidad VIP', benefit: { type: 'DISCOUNT', description: '5% descuento en próximo pedido' } }
+    ]
   },
   {
     orderId: 'SDA-2024-1203',
@@ -270,6 +282,7 @@ export const ORDERS = [
     subtotal: 180.00,
     shipping: 0,
     total: 180.00,
-    invoiceId: 'FAC-2024-1203'
+    invoiceId: 'FAC-2024-1203',
+    benefits: []
   }
 ]

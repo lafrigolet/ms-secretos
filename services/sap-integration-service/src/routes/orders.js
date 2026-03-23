@@ -10,14 +10,23 @@ export async function orderRoutes (fastify) {
     schema: {
       description: 'Obtiene todos los pedidos de un cliente',
       tags: ['orders'],
-      params: {
-        type: 'object',
-        properties: { sapCode: { type: 'string' } }
-      }
+      params: { type: 'object', properties: { sapCode: { type: 'string' } } }
     }
   }, async (request, reply) => {
     const orders = await sap.getOrders(request.params.sapCode)
     return reply.send(orders)
+  })
+
+  // Beneficios acumulados de un cliente (HU-43)
+  fastify.get('/:sapCode/benefits', {
+    schema: {
+      description: 'Obtiene los beneficios acumulados de un cliente',
+      tags: ['orders'],
+      params: { type: 'object', properties: { sapCode: { type: 'string' } } }
+    }
+  }, async (request, reply) => {
+    const benefits = await sap.getBenefits(request.params.sapCode)
+    return reply.send(benefits)
   })
 
   // Pedido individual
