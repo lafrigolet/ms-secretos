@@ -366,3 +366,406 @@ describe('POST /auth/logout', () => {
     assert.equal(res.statusCode, 401)
   })
 })
+
+// ══════════════════════════════════════════════════════════════════
+// HU-01 — Login correcto (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('HU-01 — Login correcto (cobertura adicional)', () => {
+  test('login correcto para perfil STANDARD', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00387', password: 'demo1234' }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().customer.profile, 'STANDARD')
+    assert.equal(res.json().customer.role, 'CUSTOMER')
+  })
+
+  test('el JWT incluye el campo name en el payload', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app)
+    const decoded = app.jwt.decode(token)
+    assert.ok(decoded.name, 'El payload JWT debe incluir el nombre')
+  })
+
+  test('expiresIn está presente y es una cadena no vacía', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00423', password: 'demo1234' }
+    })
+    const { expiresIn } = res.json()
+    assert.ok(typeof expiresIn === 'string' && expiresIn.length > 0)
+  })
+
+  test('la respuesta nunca incluye la contraseña del cliente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00423', password: 'demo1234' }
+    })
+    const bodyStr = JSON.stringify(res.json())
+    assert.ok(!bodyStr.includes('demo1234'), 'La contraseña no debe estar en la respuesta')
+  })
+
+  test('la respuesta incluye name y businessName del cliente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00521', password: 'demo1234' }
+    })
+    const { customer } = res.json()
+    assert.ok(typeof customer.name === 'string' && customer.name.length > 0)
+    assert.ok(typeof customer.businessName === 'string' && customer.businessName.length > 0)
+  })
+
+  test('el JWT payload del ADMIN incluye role ADMIN y profile ADMIN', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app, 'ADMIN-001', 'admin1234')
+    const decoded = app.jwt.decode(token)
+    assert.equal(decoded.sub, 'ADMIN-001')
+    assert.equal(decoded.role, 'ADMIN')
+    assert.equal(decoded.profile, 'ADMIN')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// HU-02 — Bloqueo de acceso (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('HU-02 — Bloqueo de acceso (cobertura adicional)', () => {
+  test('cuenta bloqueada por deuda tiene reason DEBT', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00187', password: 'demo1234' }
+    })
+    assert.equal(res.json().reason, 'DEBT')
+  })
+
+  test('ambas cuentas bloqueadas devuelven error ACCOUNT_BLOCKED', async () => {
+    const app = await buildApp()
+    for (const sapCode of ['SDA-00187', 'SDA-00098']) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/auth/login',
+        payload: { sapCode, password: 'demo1234' }
+      })
+      assert.equal(res.json().error, 'ACCOUNT_BLOCKED', `${sapCode} debe retornar ACCOUNT_BLOCKED`)
+    }
+  })
+
+  test('cuenta bloqueada con contraseña incorrecta sigue devolviendo 403', async () => {
+    // El bloqueo tiene prioridad sobre la verificación de contraseña
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00187', password: 'wrongpassword' }
+    })
+    assert.equal(res.statusCode, 403)
+    assert.equal(res.json().error, 'ACCOUNT_BLOCKED')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// HU-03 — Mensaje informativo (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('HU-03 — Mensaje informativo (cobertura adicional)', () => {
+  test('mensaje DEBT menciona pagos pendientes', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00187', password: 'demo1234' }
+    })
+    const { message } = res.json()
+    assert.ok(
+      message.toLowerCase().includes('pago') || message.toLowerCase().includes('deuda'),
+      'El mensaje DEBT debe mencionar pagos o deuda'
+    )
+  })
+
+  test('mensaje ADMIN menciona suspensión o administrador', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00098', password: 'demo1234' }
+    })
+    const { message } = res.json()
+    assert.ok(
+      message.toLowerCase().includes('suspend') || message.toLowerCase().includes('admin'),
+      'El mensaje ADMIN debe mencionar suspensión o administrador'
+    )
+  })
+
+  test('supportContact.email tiene formato de correo', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00187', password: 'demo1234' }
+    })
+    const { supportContact } = res.json()
+    assert.ok(supportContact.email.includes('@'), 'El email debe contener @')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// Credenciales incorrectas (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('Credenciales incorrectas (cobertura adicional)', () => {
+  test('código SAP inexistente devuelve error INVALID_CREDENTIALS', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'NO-EXISTE', password: 'demo1234' }
+    })
+    assert.equal(res.json().error, 'INVALID_CREDENTIALS')
+  })
+
+  test('contraseña incorrecta no devuelve token ni datos del cliente', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00423', password: 'wrongpassword' }
+    })
+    const body = res.json()
+    assert.equal(body.token, undefined)
+    assert.equal(body.customer, undefined)
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// Validación de esquema (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('Validación de esquema (cobertura adicional)', () => {
+  test('sapCode demasiado corto (< 3 chars) devuelve 400', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'AB', password: 'demo1234' }
+    })
+    assert.equal(res.statusCode, 400)
+  })
+
+  test('sapCode demasiado largo (> 20 chars) devuelve 400', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'A'.repeat(21), password: 'demo1234' }
+    })
+    assert.equal(res.statusCode, 400)
+  })
+
+  test('password demasiado larga (> 64 chars) devuelve 400', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00423', password: 'a'.repeat(65) }
+    })
+    assert.equal(res.statusCode, 400)
+  })
+
+  test('error de validación devuelve error VALIDATION_ERROR', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { sapCode: 'SDA-00423' }
+    })
+    assert.equal(res.json().error, 'VALIDATION_ERROR')
+  })
+
+  test('error de validación incluye campo details como array', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: {}
+    })
+    const body = res.json()
+    assert.ok(Array.isArray(body.details), 'details debe ser un array')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// GET /auth/me (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('GET /auth/me (cobertura adicional)', () => {
+  test('respuesta incluye el campo name', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app)
+    const res = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { authorization: `Bearer ${token}` }
+    })
+    assert.ok(res.json().name, 'La respuesta debe incluir el campo name')
+  })
+
+  test('usuario VIP: /auth/me devuelve profile VIP', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app, 'SDA-00521', 'demo1234')
+    const res = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { authorization: `Bearer ${token}` }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().profile, 'VIP')
+  })
+
+  test('administrador: /auth/me devuelve role ADMIN', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app, 'ADMIN-001', 'admin1234')
+    const res = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { authorization: `Bearer ${token}` }
+    })
+    assert.equal(res.statusCode, 200)
+    assert.equal(res.json().role, 'ADMIN')
+  })
+
+  test('token expirado devuelve 401', async () => {
+    const app = await buildApp()
+    // expiresIn '1ms' → exp = iat + 0 → ya expirado al momento de verificar
+    const expiredToken = app.jwt.sign(
+      { sub: 'SDA-00423', name: 'Rosa Canals', profile: 'PREMIUM', role: 'CUSTOMER' },
+      { expiresIn: '1ms' }
+    )
+    await new Promise(resolve => setTimeout(resolve, 50))
+    const res = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { authorization: `Bearer ${expiredToken}` }
+    })
+    assert.equal(res.statusCode, 401)
+  })
+
+  test('sin token devuelve error UNAUTHORIZED', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: '/auth/me' })
+    assert.equal(res.json().error, 'UNAUTHORIZED')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// POST /auth/verify (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('POST /auth/verify (cobertura adicional)', () => {
+  test('body sin campo token devuelve 400', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/verify',
+      payload: {}
+    })
+    assert.equal(res.statusCode, 400)
+  })
+
+  test('token expirado devuelve valid: false', async () => {
+    const app = await buildApp()
+    const expiredToken = app.jwt.sign(
+      { sub: 'SDA-00423', profile: 'PREMIUM', role: 'CUSTOMER' },
+      { expiresIn: '1ms' }
+    )
+    await new Promise(resolve => setTimeout(resolve, 50))
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/verify',
+      payload: { token: expiredToken }
+    })
+    assert.equal(res.statusCode, 401)
+    assert.equal(res.json().valid, false)
+  })
+
+  test('token inválido devuelve error TOKEN_INVALID_OR_EXPIRED', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/verify',
+      payload: { token: 'invalid.token.here' }
+    })
+    assert.equal(res.json().error, 'TOKEN_INVALID_OR_EXPIRED')
+  })
+
+  test('payload verificado incluye sub, profile, role, iat y exp', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app)
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/verify',
+      payload: { token }
+    })
+    const { payload } = res.json()
+    assert.ok(payload.sub)
+    assert.ok(payload.profile)
+    assert.ok(payload.role)
+    assert.ok(payload.iat)
+    assert.ok(payload.exp)
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// POST /auth/logout (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('POST /auth/logout (cobertura adicional)', () => {
+  test('mensaje de confirmación es correcto', async () => {
+    const app = await buildApp()
+    const token = await loginAndGetToken(app)
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/logout',
+      headers: { authorization: `Bearer ${token}` }
+    })
+    assert.equal(res.json().message, 'Sesión cerrada correctamente')
+  })
+
+  test('logout con token manipulado devuelve 401', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/logout',
+      headers: { authorization: 'Bearer manipulated.token.value' }
+    })
+    assert.equal(res.statusCode, 401)
+  })
+
+  test('logout sin token devuelve error UNAUTHORIZED', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'POST', url: '/auth/logout' })
+    assert.equal(res.json().error, 'UNAUTHORIZED')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
+// GET /health (cobertura adicional)
+// ══════════════════════════════════════════════════════════════════
+describe('GET /health (cobertura adicional)', () => {
+  test('timestamp es una fecha ISO válida', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: '/health' })
+    const { timestamp } = res.json()
+    assert.ok(!isNaN(Date.parse(timestamp)), 'timestamp debe ser una fecha ISO válida')
+  })
+
+  test('uptime es un número mayor o igual a cero', async () => {
+    const app = await buildApp()
+    const res = await app.inject({ method: 'GET', url: '/health' })
+    const { uptime } = res.json()
+    assert.ok(typeof uptime === 'number' && uptime >= 0)
+  })
+})

@@ -1,5 +1,6 @@
 {
+  "type": "module",
   "scripts": {
-    "test": "docker compose run --rm auth-service npm test && docker compose run --rm sap-integration-service npm test"
+    "test": "node scripts/test.js"
   }
 }
