@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
 import { catalogApi } from '../api/index.js'
 import { useAuth } from '../context/AuthContext.jsx'
-import { ProductCard } from '../components/ProductCard.jsx'
+import { ProductRow } from '../components/ProductRow.jsx'
 import { Spinner } from '../components/Spinner.jsx'
 
 const FAMILY_EMOJI = { F01: '✨', F02: '🌿', F03: '💧' }
@@ -65,49 +65,50 @@ export function CatalogPage () {
         </div>
       )}
 
-      {/* HU-07 — Tabs de familias */}
-      <div className="flex gap-2 mb-8">
-        <button
-          onClick={() => setActiveFamily(null)}
-          className={`px-5 py-2.5 rounded-full border text-sm transition-all ${
-            activeFamily === null
-              ? 'bg-sage-dark text-off-white border-sage-dark'
-              : 'bg-off-white text-muted border-border hover:border-sage hover:text-sage-dark'
-          }`}
-        >
-          Todos
-        </button>
-        {families?.map(f => (
+      {/* HU-07 — Tabs de familias + Búsqueda en la misma línea */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="flex gap-2 flex-shrink-0">
           <button
-            key={f.id}
-            onClick={() => setActiveFamily(f.id)}
-            className={`px-5 py-2.5 rounded-full border text-sm transition-all flex items-center gap-2 ${
-              activeFamily === f.id
+            onClick={() => setActiveFamily(null)}
+            className={`px-5 py-2.5 rounded-full border text-sm transition-all ${
+              activeFamily === null
                 ? 'bg-sage-dark text-off-white border-sage-dark'
                 : 'bg-off-white text-muted border-border hover:border-sage hover:text-sage-dark'
             }`}
           >
-            <span>{FAMILY_EMOJI[f.id]}</span>
-            {f.name}
+            Todos
           </button>
-        ))}
-      </div>
+          {families?.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFamily(f.id)}
+              className={`px-5 py-2.5 rounded-full border text-sm transition-all flex items-center gap-2 ${
+                activeFamily === f.id
+                  ? 'bg-sage-dark text-off-white border-sage-dark'
+                  : 'bg-off-white text-muted border-border hover:border-sage hover:text-sage-dark'
+              }`}
+            >
+              <span>{FAMILY_EMOJI[f.id]}</span>
+              {f.name}
+            </button>
+          ))}
+        </div>
 
-      {/* Búsqueda */}
-      <div className="flex items-center gap-3 bg-off-white border border-border rounded-xl px-4 py-2.5 mb-7">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8880" strokeWidth="2">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input
-          type="text"
-          placeholder="Buscar productos…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="flex-1 bg-transparent text-sm text-charcoal outline-none placeholder:text-muted"
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="text-muted hover:text-charcoal text-lg leading-none">×</button>
-        )}
+        <div className="flex items-center gap-3 bg-off-white border border-border rounded-xl px-4 py-2.5 flex-1">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8880" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar productos…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-sm text-charcoal outline-none placeholder:text-muted"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="text-muted hover:text-charcoal text-lg leading-none">×</button>
+          )}
+        </div>
       </div>
 
       {/* Grid de productos */}
@@ -121,9 +122,9 @@ export function CatalogPage () {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-5">
+        <div className="flex flex-col gap-1.5">
           {filtered.map(p => (
-            <ProductCard
+            <ProductRow
               key={p.sapCode}
               product={p}
               familyName={familyName(p.familyId)}
