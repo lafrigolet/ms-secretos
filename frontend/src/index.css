@@ -65,4 +65,24 @@
   .section-label {
     @apply text-xs tracking-widest uppercase text-sage font-medium mb-4;
   }
+
+  /* Mobile design system */
+  .m-card {
+    @apply bg-off-white;
+    box-shadow: 0 2px 16px rgba(44,44,40,0.06), 0 1px 4px rgba(44,44,40,0.04);
+  }
+
+  .m-label {
+    @apply text-[9px] tracking-[0.16em] uppercase font-medium text-muted;
+  }
+
+  .m-btn-primary {
+    @apply bg-sage-dark text-off-white font-medium flex items-center justify-center transition-all active:scale-[0.97];
+    box-shadow: 0 4px 16px rgba(74,87,64,0.28);
+  }
+
+  .m-btn-secondary {
+    @apply bg-cream text-charcoal font-medium flex items-center justify-center transition-all active:scale-[0.97];
+    box-shadow: 0 1px 4px rgba(44,44,40,0.08);
+  }
 }

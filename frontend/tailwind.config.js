@@ -22,7 +22,23 @@ export default {
         serif: ['Cormorant Garamond', 'serif'],
         sans:  ['DM Sans', 'sans-serif'],
       },
+      boxShadow: {
+        'card':     '0 2px 16px rgba(44,44,40,0.06), 0 1px 4px rgba(44,44,40,0.04)',
+        'elevated': '0 8px 32px rgba(44,44,40,0.12), 0 2px 8px rgba(44,44,40,0.06)',
+        'float':    '0 -4px 24px rgba(44,44,40,0.08)',
+        'btn':      '0 4px 16px rgba(74,87,64,0.28)',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-none': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
+        },
+      })
+    },
+  ],
 }
