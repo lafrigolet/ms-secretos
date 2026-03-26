@@ -109,6 +109,14 @@ En caso de cuenta bloqueada (403) se añaden campos adicionales:
 }
 ```
 
+## Dependencias entre servicios
+
+| Servicio | Llamada | Cuándo |
+|---|---|---|
+| `sap-integration-service` | `POST /internal/customers/verify` | Cada intento de login para verificar credenciales y estado de la cuenta |
+
+En modo stub (`NODE_ENV !== 'production'`), esta llamada HTTP es sustituida por una búsqueda en la lista de fixtures en memoria.
+
 ## Estructura interna
 
 ```
