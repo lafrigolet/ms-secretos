@@ -1,5 +1,8 @@
 import { HttpClient } from './HttpClient.js'
 
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
+
 // Datos STUB con historial extendido para cálculos de inteligencia comercial
 const STUB_ORDERS = {
   'SDA-00423': [
@@ -49,14 +52,16 @@ export class SapIntegrationClient {
   }
 
   async getOrders (sapCode) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getOrders(${sapCode})`)
       return STUB_ORDERS[sapCode] ?? []
     }
     return this.http.get(`/internal/orders/${sapCode}`) ?? []
   }
 
   async getBenefits (sapCode) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getBenefits(${sapCode})`)
       return STUB_BENEFITS[sapCode] ?? []
     }
     return this.http.get(`/internal/orders/${sapCode}/benefits`) ?? []

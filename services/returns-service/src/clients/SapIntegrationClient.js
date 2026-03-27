@@ -1,5 +1,8 @@
 import { HttpClient } from './HttpClient.js'
 
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
+
 /**
  * SapIntegrationClient — returns-service
  * HU-35: genera el abono/nota de crédito en SAP cuando una devolución es aprobada.
@@ -17,8 +20,8 @@ export class SapIntegrationClient {
    * En modo stub devuelve un ID ficticio.
    */
   async createCreditNote ({ returnId, orderId, sapCode, items }) {
-    if (process.env.NODE_ENV !== 'production') {
-      // STUB: simula la creación en SAP
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.createCreditNote(returnId:${returnId})`)
       return {
         creditNoteId: `CN-${new Date().getFullYear()}-${returnId.split('-').pop()}`,
         returnId,
@@ -38,7 +41,8 @@ export class SapIntegrationClient {
    * Obtiene un pedido para validar que pertenece al cliente antes de crear la devolución.
    */
   async getOrder (orderId) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getOrder(${orderId})`)
       const STUB_ORDERS = {
         'SDA-2025-0890': { orderId: 'SDA-2025-0890', sapCode: 'SDA-00423', total: 96 },
         'SDA-2025-0812': { orderId: 'SDA-2025-0812', sapCode: 'SDA-00423', total: 289 },

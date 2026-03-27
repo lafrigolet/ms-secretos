@@ -23,7 +23,7 @@ export class SapService {
     switch (mode) {
       case 'odata': return new ODataAdapter(this.log)
       case 'stub':
-      default:      return new StubAdapter()
+      default:      return new StubAdapter(this.log)
     }
   }
 

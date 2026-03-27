@@ -1,3 +1,5 @@
+const isDev = process.env.NODE_ENV !== 'production'
+
 export class HttpClient {
   constructor (baseUrl, options = {}) {
     this.baseUrl = baseUrl

@@ -1,5 +1,8 @@
 import { HttpClient } from './HttpClient.js'
 
+const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
+
 const STUB_ORDERS = {
   'SDA-00423': [
     { orderId: 'SDA-2025-0890', date: '2025-03-08', status: 'SHIPPED',   total: 96.00 },
@@ -32,12 +35,18 @@ export class SapIntegrationClient {
   }
 
   async getOrders (sapCode) {
-    if (process.env.NODE_ENV !== 'production') return STUB_ORDERS[sapCode] ?? []
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getOrders(${sapCode})`)
+      return STUB_ORDERS[sapCode] ?? []
+    }
     return this.http.get(`/internal/orders/${sapCode}`) ?? []
   }
 
   async getCustomer (sapCode) {
-    if (process.env.NODE_ENV !== 'production') return STUB_CUSTOMERS[sapCode] ?? null
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getCustomer(${sapCode})`)
+      return STUB_CUSTOMERS[sapCode] ?? null
+    }
     return this.http.get(`/internal/customers/${sapCode}`)
   }
 }

@@ -1,6 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
 const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
 
 const STUB_ORDERS = {
   'SDA-00423': [
@@ -36,12 +37,18 @@ export class SapIntegrationClient {
   }
 
   getOrders (sapCode) {
-    if (STUB_MODE) return Promise.resolve(STUB_ORDERS[sapCode] ?? [])
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getOrders(${sapCode})`)
+      return Promise.resolve(STUB_ORDERS[sapCode] ?? [])
+    }
     return this.http.get(`/internal/orders/${sapCode}`)
   }
 
   getInvoice (invoiceId) {
-    if (STUB_MODE) return Promise.resolve(STUB_INVOICES[invoiceId] ?? null)
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getInvoice(${invoiceId})`)
+      return Promise.resolve(STUB_INVOICES[invoiceId] ?? null)
+    }
     return this.http.get(`/internal/orders/invoice/${invoiceId}`)
   }
 }

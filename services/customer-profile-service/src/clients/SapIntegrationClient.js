@@ -1,6 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
 const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
 
 // Datos originales — NUNCA se mutan directamente
 const STUB_CUSTOMERS_SEED = [
@@ -32,17 +33,24 @@ export class SapIntegrationClient {
   }
 
   async getCustomer (sapCode) {
-    if (STUB_MODE) return this._stub.find(c => c.sapCode === sapCode) ?? null
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.getCustomer(${sapCode})`)
+      return this._stub.find(c => c.sapCode === sapCode) ?? null
+    }
     return this.http.get(`/internal/customers/${sapCode}`)
   }
 
   async getAllCustomers () {
-    if (STUB_MODE) return [...this._stub]
+    if (STUB_MODE) {
+      if (isDev) console.log('[stub] SapIntegrationClient.getAllCustomers()')
+      return [...this._stub]
+    }
     return this.http.get('/internal/customers')
   }
 
   async updateProfile (sapCode, profile) {
     if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.updateProfile(${sapCode}, ${profile})`)
       const c = this._stub.find(c => c.sapCode === sapCode)
       if (c) c.profile = profile
       return c ?? null
@@ -53,6 +61,7 @@ export class SapIntegrationClient {
   // HU-28 — activar o bloquear una cuenta
   async updateStatus (sapCode, status, blockReason = null) {
     if (STUB_MODE) {
+      if (isDev) console.log(`[stub] SapIntegrationClient.updateStatus(${sapCode}, ${status})`)
       const c = this._stub.find(c => c.sapCode === sapCode)
       if (c) { c.status = status; c.blockReason = blockReason }
       return c ?? null

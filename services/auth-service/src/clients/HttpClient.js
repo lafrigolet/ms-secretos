@@ -3,6 +3,8 @@
  * Cliente HTTP base usado por todos los API clients.
  * Gestiona timeout, errores de red y respuestas no-OK de forma centralizada.
  */
+const isDev = process.env.NODE_ENV !== 'production'
+
 export class HttpClient {
   constructor (baseUrl, options = {}) {
     this.baseUrl = baseUrl
@@ -27,7 +29,9 @@ export class HttpClient {
 
     if (body !== undefined) options.body = JSON.stringify(body)
 
+    if (isDev) console.log(`[http] → ${method} ${url}`)
     const res = await fetch(url, options)
+    if (isDev) console.log(`[http] ← ${method} ${url} ${res.status}`)
 
     if (res.status === 404) return null
     if (!res.ok) {

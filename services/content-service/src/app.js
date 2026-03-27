@@ -11,7 +11,7 @@ import { errorHandler }       from './middleware/errorHandler.js'
 
 const app = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
+    level: 'info',
     transport: process.env.NODE_ENV !== 'production'
       ? { target: 'pino-pretty', options: { colorize: true } }
       : undefined

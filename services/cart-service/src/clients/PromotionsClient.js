@@ -1,6 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
 const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
 
 /**
  * PromotionsClient — cart-service
@@ -17,6 +18,7 @@ export class PromotionsClient {
 
   async calculateBenefits (items, orderTotal, token) {
     if (STUB_MODE) {
+      if (isDev) console.log(`[stub] PromotionsClient.calculateBenefits(total:${orderTotal})`)
       if (orderTotal >= 100) {
         return [{ type: 'GIFT', description: 'Muestra Sérum Raíces 15ml', promoName: 'Promo Otoño' }]
       }

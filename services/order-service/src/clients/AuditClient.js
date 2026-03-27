@@ -1,6 +1,7 @@
 import { HttpClient } from './HttpClient.js'
 
 const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isDev = STUB_MODE
 
 export class AuditClient {
   constructor () {
@@ -11,7 +12,10 @@ export class AuditClient {
   }
 
   log (action, sapCode, data = {}) {
-    if (STUB_MODE) return  // en tests no auditamos
+    if (STUB_MODE) {
+      if (isDev) console.log(`[stub] AuditClient.log(${action}, ${sapCode})`)
+      return
+    }
     this.http.post('/audit', { action, sapCode, data })
       .catch(() => {})
   }
