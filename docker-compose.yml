@@ -42,6 +42,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/sda-frontend:latest
     expose:
       - "5173"
     environment:
@@ -57,6 +58,7 @@ services:
     build:
       context: ./services/sustainability-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/sustainability-service:latest
     expose:
       - "3016"
     ports:
@@ -80,6 +82,7 @@ services:
     build:
       context: ./services/notification-preferences-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/notification-preferences-service:latest
     expose:
       - "3015"
     ports:
@@ -103,6 +106,7 @@ services:
     build:
       context: ./services/commercial-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/commercial-service:latest
     expose:
       - "3014"
     ports:
@@ -129,6 +133,7 @@ services:
     build:
       context: ./services/intelligence-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/intelligence-service:latest
     expose:
       - "3013"
     ports:
@@ -155,6 +160,7 @@ services:
     build:
       context: ./services/content-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/content-service:latest
     expose:
       - "3012"
     ports:
@@ -178,6 +184,7 @@ services:
     build:
       context: ./services/returns-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/returns-service:latest
     expose:
       - "3011"
     ports:
@@ -204,6 +211,7 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/auth-service:latest
     expose:
       - "3001"
     ports:
@@ -229,6 +237,7 @@ services:
     build:
       context: ./services/catalog-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/catalog-service:latest
     expose:
       - "3002"
     ports:
@@ -255,6 +264,7 @@ services:
     build:
       context: ./services/customer-profile-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/customer-profile-service:latest
     expose:
       - "3003"
     ports:
@@ -281,6 +291,7 @@ services:
     build:
       context: ./services/promotions-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/promotions-service:latest
     expose:
       - "3004"
     ports:
@@ -304,6 +315,7 @@ services:
     build:
       context: ./services/cart-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/cart-service:latest
     expose:
       - "3005"
     ports:
@@ -330,6 +342,7 @@ services:
     build:
       context: ./services/order-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/order-service:latest
     expose:
       - "3006"
     ports:
@@ -358,6 +371,7 @@ services:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/notification-service:latest
     expose:
       - "3007"
     ports:
@@ -381,6 +395,7 @@ services:
     build:
       context: ./services/invoice-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/invoice-service:latest
     expose:
       - "3008"
     ports:
@@ -407,6 +422,7 @@ services:
     build:
       context: ./services/audit-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/audit-service:latest
     expose:
       - "3009"
     ports:
@@ -430,6 +446,7 @@ services:
     build:
       context: ./services/sap-integration-service
       dockerfile: Dockerfile
+    image: ghcr.io/lafrigolet/sap-integration-service:latest
     expose:
       - "3010"
     ports:
