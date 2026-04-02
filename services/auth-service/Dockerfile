@@ -9,6 +9,7 @@ RUN npm install --omit=dev
 # Copiar código fuente
 COPY src/ ./src/
 
+RUN chown -R node:node /app
 USER node
 
 EXPOSE 3001

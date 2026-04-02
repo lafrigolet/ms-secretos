@@ -4,6 +4,7 @@ COPY package.json ./
 RUN npm install --omit=dev
 COPY src/ ./src/
 
+RUN chown -R node:node /app
 USER node
 
 EXPOSE 3011
