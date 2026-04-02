@@ -4,7 +4,7 @@
  * En modo desarrollo usa datos locales (STUB) si SAP no está disponible.
  */
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 const STUB_CUSTOMERS = [
   {
@@ -75,7 +75,7 @@ export class SapIntegrationClient {
   }
 
   async getCustomer (sapCode) {
-    if (STUB_MODE) return this.#stubGetCustomer(sapCode)
+    if (isStubMode()) return this.#stubGetCustomer(sapCode)
 
     const res = await fetch(`${this.baseUrl}/internal/customers/${sapCode}`, {
       signal: AbortSignal.timeout(5000)
@@ -86,7 +86,7 @@ export class SapIntegrationClient {
   }
 
   async getAllCustomers () {
-    if (STUB_MODE) return STUB_CUSTOMERS.map(c => ({ ...c }))
+    if (isStubMode()) return STUB_CUSTOMERS.map(c => ({ ...c }))
 
     const res = await fetch(`${this.baseUrl}/internal/customers`, {
       signal: AbortSignal.timeout(5000)
@@ -96,7 +96,7 @@ export class SapIntegrationClient {
   }
 
   async updateProfile (sapCode, profile) {
-    if (STUB_MODE) return this.#stubUpdateProfile(sapCode, profile)
+    if (isStubMode()) return this.#stubUpdateProfile(sapCode, profile)
 
     const res = await fetch(`${this.baseUrl}/internal/customers/${sapCode}`, {
       method: 'PATCH',

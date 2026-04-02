@@ -1,7 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
-const isDev = STUB_MODE
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 const STUB_CUSTOMERS = [
   { sapCode: 'SDA-00423', password: 'demo1234', name: 'Rosa Canals', businessName: 'Salón Canals Barcelona', profile: 'PREMIUM', role: 'CUSTOMER', status: 'ACTIVE' },
@@ -25,8 +24,8 @@ export class SapIntegrationClient {
   }
 
   async verifyCredentials (sapCode, password) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.verifyCredentials(${sapCode})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.verifyCredentials(${sapCode})`)
       return this.#stubVerify(sapCode, password)
     }
     return this.http.post('/internal/customers/verify', { sapCode, password })

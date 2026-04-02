@@ -1,7 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
-const isDev = STUB_MODE
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 export class NotificationClient {
   constructor () {
@@ -12,8 +11,8 @@ export class NotificationClient {
   }
 
   orderConfirmed (order, user) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] NotificationClient.orderConfirmed(orderId:${order?.orderId})`)
+    if (isStubMode()) {
+      console.log(`[stub] NotificationClient.orderConfirmed(orderId:${order?.orderId})`)
       return
     }
     this.http.post('/notifications/order-confirmed', { order, user })

@@ -1,7 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
-const isDev = STUB_MODE
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 const STUB_FAMILIES = [
   { id: 'F01', name: 'Ritual Timeless',    description: 'Tratamiento restaurador intensivo' },
@@ -39,16 +38,16 @@ export class SapIntegrationClient {
   }
 
   getFamilies () {
-    if (STUB_MODE) {
-      if (isDev) console.log('[stub] SapIntegrationClient.getFamilies()')
+    if (isStubMode()) {
+      console.log('[stub] SapIntegrationClient.getFamilies()')
       return Promise.resolve([...STUB_FAMILIES])
     }
     return this.http.get('/internal/catalog/families')
   }
 
   getProducts (familyId = null) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getProducts(${familyId ?? 'all'})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getProducts(${familyId ?? 'all'})`)
       const products = familyId
         ? STUB_PRODUCTS.filter(p => p.familyId === familyId)
         : [...STUB_PRODUCTS]
@@ -58,24 +57,24 @@ export class SapIntegrationClient {
   }
 
   getProduct (sapCode) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getProduct(${sapCode})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getProduct(${sapCode})`)
       return Promise.resolve(STUB_PRODUCTS.find(p => p.sapCode === sapCode) ?? null)
     }
     return this.http.get(`/internal/catalog/products/${sapCode}`)
   }
 
   getPricesForProfile (profile) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getPricesForProfile(${profile})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getPricesForProfile(${profile})`)
       return Promise.resolve({ ...(STUB_PRICES[profile] ?? STUB_PRICES.STANDARD) })
     }
     return this.http.get(`/internal/catalog/prices/${profile}`)
   }
 
   getPrice (profile, productCode) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getPrice(${profile}, ${productCode})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getPrice(${profile}, ${productCode})`)
       const price = (STUB_PRICES[profile] ?? STUB_PRICES.STANDARD)[productCode] ?? null
       return Promise.resolve(price != null ? { price } : null)
     }
@@ -83,16 +82,16 @@ export class SapIntegrationClient {
   }
 
   getAllStock () {
-    if (STUB_MODE) {
-      if (isDev) console.log('[stub] SapIntegrationClient.getAllStock()')
+    if (isStubMode()) {
+      console.log('[stub] SapIntegrationClient.getAllStock()')
       return Promise.resolve({ ...STUB_STOCK })
     }
     return this.http.get('/internal/catalog/stock')
   }
 
   getStock (productCode) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getStock(${productCode})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getStock(${productCode})`)
       const s = STUB_STOCK[productCode] ?? 0
       return Promise.resolve({ stock: s })
     }

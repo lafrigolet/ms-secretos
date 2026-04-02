@@ -714,7 +714,7 @@ describe('HU-34, HU-35 — PATCH /admin/returns/:id — cambiar estado', () => {
   test('respuesta de APPROVED incluye message', async () => {
     const app = await buildApp()
     const res = await app.inject({
-      method: 'PATCH', url: '/admin/returns/RET-2025-001',
+      method: 'PATCH', url: '/admin/returns/RET-2025-002',
       headers: { authorization: `Bearer ${adminToken(app)}` },
       payload: { status: 'APPROVED' }
     })

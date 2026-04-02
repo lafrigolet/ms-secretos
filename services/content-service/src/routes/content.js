@@ -99,7 +99,8 @@ export async function contentRoutes (fastify) {
     let result = news
       .filter(n => n.active)
       .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-    if (request.query.featured === 'true') result = result.filter(n => n.featured)
+    if (request.query.featured === 'true')  result = result.filter(n => n.featured)
+    if (request.query.featured === 'false') result = result.filter(n => !n.featured)
     return reply.send(result)
   })
 

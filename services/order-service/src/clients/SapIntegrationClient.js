@@ -1,7 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
-const isDev = STUB_MODE
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 const STUB_ORDERS = {
   'SDA-00423': [
@@ -32,24 +31,24 @@ export class SapIntegrationClient {
   }
 
   getOrders (sapCode) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getOrders(${sapCode})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getOrders(${sapCode})`)
       return Promise.resolve(STUB_ORDERS[sapCode] ?? [])
     }
     return this.http.get(`/internal/orders/${sapCode}`)
   }
 
   getOrder (orderId) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.getOrder(${orderId})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.getOrder(${orderId})`)
       return Promise.resolve(STUB_ORDER_BY_ID[orderId] ?? null)
     }
     return this.http.get(`/internal/orders/order/${orderId}`)
   }
 
   createOrder (sapCode, items) {
-    if (STUB_MODE) {
-      if (isDev) console.log(`[stub] SapIntegrationClient.createOrder(${sapCode}, items:${items.length})`)
+    if (isStubMode()) {
+      console.log(`[stub] SapIntegrationClient.createOrder(${sapCode}, items:${items.length})`)
       const total = items.reduce((s, i) => s + (i.unitPrice ?? 0) * i.quantity, 0)
       const order = {
         orderId: `SDA-2025-${String(++stubCounter)}`,

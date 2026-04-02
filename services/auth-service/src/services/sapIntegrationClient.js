@@ -6,7 +6,7 @@
  * En producción reemplazar STUB_MODE=false y apuntar a SAP_INTEGRATION_URL.
  */
 
-const STUB_MODE = process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV !== 'production'
 
 // ── Datos de prueba ───────────────────────────────────────────────────────────
 const STUB_CUSTOMERS = [
@@ -73,7 +73,7 @@ export class SapIntegrationClient {
    * @returns {object} datos del cliente con estado de autenticación y bloqueo
    */
   async verifyCredentials (sapCode, password) {
-    if (STUB_MODE) {
+    if (isStubMode()) {
       return this.#stubVerify(sapCode, password)
     }
 

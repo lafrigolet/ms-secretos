@@ -38,7 +38,7 @@ FAILED_SERVICES=()
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║        Secretos del Agua — Test Suite                       ║"
+echo "║        Secretos del Agua — Test Suite                        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -70,7 +70,7 @@ for SVC in "${SERVICES[@]}"; do
 done
 
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  RESULTADO FINAL                                            ║"
+echo "║  RESULTADO FINAL                                             ║"
 printf "║  ✅ Pasados:  %-3s   ❌ Fallidos: %-3s                       ║\n" "$TOTAL_PASS" "$TOTAL_FAIL"
 echo "╚══════════════════════════════════════════════════════════════╝"
 
