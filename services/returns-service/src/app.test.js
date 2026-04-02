@@ -11,7 +11,7 @@ import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.JWT_SECRET  = 'test-secret'
-process.env.NODE_ENV    = 'development'
+process.env.NODE_ENV = 'test'
 
 async function buildApp () {
   const app = Fastify({ logger: false })
