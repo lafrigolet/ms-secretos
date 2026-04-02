@@ -312,6 +312,14 @@ Run against staging before each major release.
 
 ---
 
+## Known accepted risks
+
+| CVE / GHSA | Package | Severity | Status | Reason accepted |
+|------------|---------|----------|--------|-----------------|
+| GHSA-mvf2-f6gm-w987 | fast-jwt (via @fastify/jwt) | Critical | No fix available | RSA algorithm confusion attack. Project uses HMAC (`JWT_SECRET`), not RSA keys — attack vector does not apply. Allowlisted via `audit-ci` so all other high/critical vulnerabilities still fail CI. |
+
+---
+
 ## Reporting a vulnerability
 
 If you discover a security vulnerability, do **not** open a public GitHub issue.

@@ -51,7 +51,10 @@ jobs:
 
       - name: Audit dependencies
         working-directory: services/${{ matrix.service }}
-        run: npm audit --audit-level=high
+        # GHSA-mvf2-f6gm-w987: fast-jwt RSA algorithm confusion, no fix available.
+        # Project uses HMAC only — attack vector does not apply. Allowlisted specifically
+        # so all other high/critical vulnerabilities still fail the build.
+        run: npx --yes audit-ci --high --allowlist GHSA-mvf2-f6gm-w987
 
       - name: Run tests
         working-directory: services/${{ matrix.service }}
