@@ -21,7 +21,7 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-08 | JWT hardening + refresh rotation | Soon | Medium | Free | ⬜ Pending |
 | SE-09 | CORS lockdown | Soon | Low | Free | ⬜ Pending |
 | SE-10 | Nginx request size limits | Soon | Low | Free | ✅ Done |
-| SE-11 | npm audit + Snyk in CI | Soon | Low | Free | ⚠️ Partial — audit runs at `critical` level pending fastify v4→v5 upgrade |
+| SE-11 | npm audit + Snyk in CI | Soon | Low | Free | ✅ Done |
 | SE-12 | File upload security (HU-39) | Soon | Medium | Free | ⬜ Pending |
 | SE-13 | MFA for admin and commercial roles | Soon | Medium | Free | ⬜ Pending |
 | SE-14 | Secrets management (Doppler/Vault) | Later | Medium | Free | ⬜ Pending |
