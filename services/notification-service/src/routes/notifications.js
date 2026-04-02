@@ -1,5 +1,6 @@
 // Registro en memoria de notificaciones enviadas (en producción: cola de mensajes o BD)
 const SENT = []
+let counter = 0
 
 /**
  * En producción este servicio usaría nodemailer, SendGrid, AWS SES, etc.
@@ -7,7 +8,7 @@ const SENT = []
  */
 async function sendEmail ({ to, subject, body }) {
   const notification = {
-    id: `NOTIF-${Date.now()}`,
+    id: `NOTIF-${Date.now()}-${++counter}`,
     to,
     subject,
     body,
