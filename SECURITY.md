@@ -19,13 +19,13 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-06 | Tenant isolation audit | Now | Medium | Free | ⬜ Pending |
 | SE-07 | Cloudflare free tier (WAF + DDoS) | Soon | Low | Free | ⬜ Pending |
 | SE-08 | JWT hardening + refresh rotation | Soon | Medium | Free | ⬜ Pending |
-| SE-09 | CORS lockdown | Soon | Low | Free | ⬜ Pending |
+| SE-09 | CORS lockdown | Soon | Low | Free | ✅ Done |
 | SE-10 | Nginx request size limits | Soon | Low | Free | ✅ Done |
 | SE-11 | npm audit + Snyk in CI | Soon | Low | Free | ✅ Done |
 | SE-12 | File upload security (HU-39) | Soon | Medium | Free | ⬜ Pending |
 | SE-13 | MFA for admin and commercial roles | Soon | Medium | Free | ⬜ Pending |
 | SE-14 | Secrets management (Doppler/Vault) | Later | Medium | Free | ⬜ Pending |
-| SE-15 | Non-root containers + cap_drop | Later | Medium | Free | ⬜ Pending |
+| SE-15 | Non-root containers + cap_drop | Later | Medium | Free | ✅ Done |
 | SE-16 | Persistent audit log (HU-22) | Later | Medium | Free | ⬜ Pending |
 | SE-17 | Docker network segmentation | Later | Medium | Free | ⬜ Pending |
 | SE-18 | mTLS on SAP integration | Later | High | Free | ⬜ Pending |

@@ -9,6 +9,8 @@ RUN npm install --omit=dev
 # Copiar código fuente
 COPY src/ ./src/
 
+USER node
+
 EXPOSE 3001
 
 CMD ["node", "src/app.js"]

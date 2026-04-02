@@ -7,6 +7,8 @@ RUN npm install --omit=dev
 
 COPY src/ ./src/
 
+USER node
+
 EXPOSE 3010
 
 CMD ["node", "src/app.js"]

@@ -17,7 +17,9 @@ const app = Fastify({
   }
 })
 
-await app.register(corsPlugin)
+await app.register(corsPlugin, {
+  origin: process.env.ALLOWED_ORIGINS?.split(',') ?? (process.env.NODE_ENV === 'production' ? false : true)
+})
 await app.register(jwtPlugin, { secret: process.env.JWT_SECRET })
 await app.register(swaggerPlugin, {
   openapi: {

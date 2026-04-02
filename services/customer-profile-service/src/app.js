@@ -22,7 +22,7 @@ const app = Fastify({
 
 // ── Plugins ───────────────────────────────────────────────────────
 await app.register(corsPlugin, {
-  origin: process.env.ALLOWED_ORIGINS?.split(',') ?? true
+  origin: process.env.ALLOWED_ORIGINS?.split(',') ?? (process.env.NODE_ENV === 'production' ? false : true)
 })
 
 await app.register(jwtPlugin, {
