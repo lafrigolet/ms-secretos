@@ -752,6 +752,97 @@ describe('POST /auth/logout (cobertura adicional)', () => {
 })
 
 // ══════════════════════════════════════════════════════════════════
+// SE-20 — Per-user login rate limiting
+// NOTE: failedAttempts Map is module-level and shared across all
+// buildApp() calls. Each sub-test uses a unique sapCode to avoid
+// contaminating other test suites.
+// ══════════════════════════════════════════════════════════════════
+describe('SE-20 — Login rate limiting', () => {
+  test('5 intentos fallidos → 6.º devuelve 429 TOO_MANY_ATTEMPTS', async () => {
+    const app = await buildApp()
+    const sapCode = 'SDA-RATELIMIT-A'
+    // Perform 5 failed attempts (wrong password, sapCode not in stub → 401 each time)
+    for (let i = 0; i < 5; i++) {
+      const res = await app.inject({
+        method: 'POST', url: '/auth/login',
+        payload: { sapCode, password: 'wrongpassword' }
+      })
+      assert.equal(res.statusCode, 401, `intento ${i + 1} debe devolver 401`)
+    }
+    // 6th attempt must be locked
+    const res = await app.inject({
+      method: 'POST', url: '/auth/login',
+      payload: { sapCode, password: 'wrongpassword' }
+    })
+    assert.equal(res.statusCode, 429)
+    assert.equal(res.json().error, 'TOO_MANY_ATTEMPTS')
+  })
+
+  test('429 incluye campo retryAfter en segundos', async () => {
+    const app = await buildApp()
+    const sapCode = 'SDA-RATELIMIT-B'
+    for (let i = 0; i < 5; i++) {
+      await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrong' } })
+    }
+    const res = await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrong' } })
+    assert.equal(res.statusCode, 429)
+    const body = res.json()
+    assert.ok(typeof body.retryAfter === 'number' && body.retryAfter > 0, 'retryAfter debe ser un número positivo')
+    assert.ok(body.retryAfter <= 15 * 60, 'retryAfter no debe superar 900 segundos')
+  })
+
+  test('tras bloqueo, contraseña correcta también devuelve 429', async () => {
+    const app = await buildApp()
+    const sapCode = 'SDA-RATELIMIT-C'
+    // Lock the account
+    for (let i = 0; i < 5; i++) {
+      await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrong' } })
+    }
+    // Now try with correct credentials for a known stub user (we use the sapCode directly
+    // so it won't match STUB_CUSTOMERS, but the lock check happens before auth — still 429)
+    const res = await app.inject({
+      method: 'POST', url: '/auth/login',
+      payload: { sapCode, password: 'demo1234' }
+    })
+    assert.equal(res.statusCode, 429)
+    assert.equal(res.json().error, 'TOO_MANY_ATTEMPTS')
+  })
+
+  test('login correcto restablece el contador de intentos fallidos', async () => {
+    const app = await buildApp()
+    // Use a real stub user to test counter reset
+    const sapCode = 'SDA-00521'  // VIP, valid credentials
+    // 4 failed attempts (below lock threshold)
+    for (let i = 0; i < 4; i++) {
+      await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrongpassword' } })
+    }
+    // Successful login resets counter
+    const successRes = await app.inject({
+      method: 'POST', url: '/auth/login',
+      payload: { sapCode, password: 'demo1234' }
+    })
+    assert.equal(successRes.statusCode, 200, 'login correcto debe devolver 200')
+    // After reset, a failed attempt is treated as attempt #1, not #5
+    const failRes = await app.inject({
+      method: 'POST', url: '/auth/login',
+      payload: { sapCode, password: 'wrongpassword' }
+    })
+    assert.equal(failRes.statusCode, 401, 'primer intento fallido tras reset debe devolver 401, no 429')
+  })
+
+  test('429 devuelve campo message con información de tiempo de espera', async () => {
+    const app = await buildApp()
+    const sapCode = 'SDA-RATELIMIT-D'
+    for (let i = 0; i < 5; i++) {
+      await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrong' } })
+    }
+    const res = await app.inject({ method: 'POST', url: '/auth/login', payload: { sapCode, password: 'wrong' } })
+    assert.equal(res.statusCode, 429)
+    assert.ok(res.json().message.length > 0, 'message debe estar presente')
+  })
+})
+
+// ══════════════════════════════════════════════════════════════════
 // GET /health (cobertura adicional)
 // ══════════════════════════════════════════════════════════════════
 describe('GET /health (cobertura adicional)', () => {

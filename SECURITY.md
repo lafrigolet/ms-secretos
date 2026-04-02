@@ -16,7 +16,7 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-03 | Hide Nginx version | Now | Low | Free | ✅ Done |
 | SE-04 | Fail2ban on VM | Now | Low | Free | ⬜ Pending |
 | SE-05 | Disable root SSH + password auth | Now | Low | Free | ⬜ Pending |
-| SE-06 | Tenant isolation audit | Now | Medium | Free | ⬜ Pending |
+| SE-06 | Tenant isolation audit | Now | Medium | Free | ✅ Done |
 | SE-07 | Cloudflare free tier (WAF + DDoS) | Soon | Low | Free | ⬜ Pending |
 | SE-08 | JWT hardening + refresh rotation | Soon | Medium | Free | ⬜ Pending |
 | SE-09 | CORS lockdown | Soon | Low | Free | ✅ Done |
@@ -30,7 +30,7 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-17 | Docker network segmentation | Later | Medium | Free | ⬜ Pending |
 | SE-18 | mTLS on SAP integration | Later | High | Free | ⬜ Pending |
 | SE-19 | Pentest with OWASP ZAP | Later | High | Free | ⬜ Pending |
-| SE-20 | Per-user login rate limiting (sapCode) | Soon | Medium | Free | ⬜ Pending |
+| SE-20 | Per-user login rate limiting (sapCode) | Soon | Medium | Free | ✅ Done |
 
 ---
 

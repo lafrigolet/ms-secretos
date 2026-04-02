@@ -260,6 +260,43 @@ describe('HU-14 — Gestión de cesta', () => {
     assert.equal(resA.json().items.length, 1)
   })
 
+  // SE-06 — Tenant isolation tests
+  test('SE-06 — GET /cart: usuario B no puede ver el carrito de usuario A', async () => {
+    const app = await buildApp()
+    const tA = token(app, 'USER-SE06-A')
+    const tB = token(app, 'USER-SE06-B')
+    await app.inject({ method: 'POST', url: '/cart/items', headers: { authorization: `Bearer ${tA}` }, payload: { productCode: 'P-SE06', name: 'Producto', quantity: 3, unitPrice: 20 } })
+    // B gets their own empty cart, not A's
+    const resB = await app.inject({ method: 'GET', url: '/cart', headers: { authorization: `Bearer ${tB}` } })
+    assert.equal(resB.statusCode, 200)
+    assert.deepEqual(resB.json().items, [])
+  })
+
+  test('SE-06 — POST /cart/items: los ítems se añaden al carrito del usuario autenticado, no a otro', async () => {
+    const app = await buildApp()
+    const tA = token(app, 'USER-SE06-POST-A')
+    const tB = token(app, 'USER-SE06-POST-B')
+    // B adds an item
+    await app.inject({ method: 'POST', url: '/cart/items', headers: { authorization: `Bearer ${tB}` }, payload: { productCode: 'P-B', name: 'B', quantity: 1, unitPrice: 10 } })
+    // A's cart is still empty
+    const resA = await app.inject({ method: 'GET', url: '/cart', headers: { authorization: `Bearer ${tA}` } })
+    assert.deepEqual(resA.json().items, [])
+  })
+
+  test('SE-06 — DELETE /cart: vaciado de carrito solo afecta al usuario autenticado', async () => {
+    const app = await buildApp()
+    const tA = token(app, 'USER-SE06-DEL-A')
+    const tB = token(app, 'USER-SE06-DEL-B')
+    await app.inject({ method: 'POST', url: '/cart/items', headers: { authorization: `Bearer ${tA}` }, payload: { productCode: 'P-A', name: 'A', quantity: 2, unitPrice: 15 } })
+    await app.inject({ method: 'POST', url: '/cart/items', headers: { authorization: `Bearer ${tB}` }, payload: { productCode: 'P-B', name: 'B', quantity: 1, unitPrice: 25 } })
+    // B empties their cart
+    await app.inject({ method: 'DELETE', url: '/cart', headers: { authorization: `Bearer ${tB}` } })
+    // A's cart is untouched
+    const resA = await app.inject({ method: 'GET', url: '/cart', headers: { authorization: `Bearer ${tA}` } })
+    assert.equal(resA.json().items.length, 1)
+    assert.equal(resA.json().items[0].productCode, 'P-A')
+  })
+
   test('añadir producto devuelve los campos del item correctamente', async () => {
     const app = await buildApp()
     const t = token(app, 'USER-FIELDS')
@@ -467,6 +504,19 @@ describe('HU-16 — Resumen del pedido', () => {
     const t = token(app, 'USER-SUMTHRESH')
     const res = await app.inject({ method: 'GET', url: '/cart/summary', headers: { authorization: `Bearer ${t}` } })
     assert.equal(res.json().shippingThreshold, 150)
+  })
+
+  test('SE-06 — GET /cart/summary aislado por usuario: usuario B no ve items de usuario A', async () => {
+    const app = await buildApp()
+    const tA = token(app, 'USER-ISO-SUMMARY-A')
+    const tB = token(app, 'USER-ISO-SUMMARY-B')
+    // A adds an item
+    await app.inject({ method: 'POST', url: '/cart/items', headers: { authorization: `Bearer ${tA}` }, payload: { productCode: 'P-A', name: 'A', quantity: 1, unitPrice: 100 } })
+    // B's summary is empty
+    const resB = await app.inject({ method: 'GET', url: '/cart/summary', headers: { authorization: `Bearer ${tB}` } })
+    assert.equal(resB.statusCode, 200)
+    assert.deepEqual(resB.json().items, [])
+    assert.equal(resB.json().subtotal, 0)
   })
 
   test('summary con subtotal exactamente 100 activa beneficio STUB', async () => {
