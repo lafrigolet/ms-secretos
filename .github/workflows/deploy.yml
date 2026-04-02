@@ -49,6 +49,10 @@ jobs:
         working-directory: services/${{ matrix.service }}
         run: npm install
 
+      - name: Audit dependencies
+        working-directory: services/${{ matrix.service }}
+        run: npm audit --audit-level=high
+
       - name: Run tests
         working-directory: services/${{ matrix.service }}
         run: npm test
