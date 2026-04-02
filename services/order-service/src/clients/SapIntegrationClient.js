@@ -1,6 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 const STUB_ORDERS = {
   'SDA-00423': [

@@ -1,6 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 // Datos originales — NUNCA se mutan directamente
 const STUB_CUSTOMERS_SEED = [

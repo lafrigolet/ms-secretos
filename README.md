@@ -70,38 +70,19 @@ y trabajar en un único servicio sin necesidad de arrancar los demás.
 
 ## Arranque rápido
 
-### Requisitos previos
-
-- Node.js 20+
-- Docker y Docker Compose
-
-### Arrancar todo el stack
-
 ```bash
-git clone <repo>
-cd secretos-del-agua
+git clone https://github.com/lafrigolet/ms-secretos.git
+cd ms-secretos
 cp .env.example .env
-docker compose up
+docker compose up --build
 ```
 
 El frontend estará disponible en `http://localhost`.
 
-### Trabajar en un único servicio (sin Docker)
+Para instrucciones detalladas de desarrollo y despliegue:
 
-```bash
-cd services/auth-service
-npm install
-cp .env.example .env
-npm run dev
-```
-
-Cada servicio tiene su propio `README.md` con instrucciones detalladas.
-
-### Arrancar solo un servicio con Docker
-
-```bash
-docker compose up auth-service
-```
+- [DEVELOPMENT.md](DEVELOPMENT.md) — entorno local, tests, variables de entorno, stub mode
+- [DEPLOYMENT.md](DEPLOYMENT.md) — CI/CD, GitHub Actions, Hetzner, producción
 
 ---
 

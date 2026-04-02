@@ -1,6 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 // Datos STUB con historial extendido para cálculos de inteligencia comercial
 const STUB_ORDERS = {

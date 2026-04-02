@@ -1,6 +1,6 @@
 import { HttpClient } from './HttpClient.js'
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 const STUB_CUSTOMERS = [
   { sapCode: 'SDA-00423', password: 'demo1234', name: 'Rosa Canals', businessName: 'Salón Canals Barcelona', profile: 'PREMIUM', role: 'CUSTOMER', status: 'ACTIVE' },

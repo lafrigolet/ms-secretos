@@ -4,7 +4,7 @@
  * En modo desarrollo usa datos locales (STUB) si SAP no está disponible.
  */
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 const STUB_CUSTOMERS = [
   {

@@ -6,7 +6,7 @@
  * En producción reemplazar STUB_MODE=false y apuntar a SAP_INTEGRATION_URL.
  */
 
-const isStubMode = () => process.env.NODE_ENV !== 'production'
+const isStubMode = () => process.env.NODE_ENV === 'test'
 
 // ── Datos de prueba ───────────────────────────────────────────────────────────
 const STUB_CUSTOMERS = [

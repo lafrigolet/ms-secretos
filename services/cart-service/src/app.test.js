@@ -10,6 +10,7 @@ import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 process.env.JWT_SECRET = 'test-secret'
+process.env.NODE_ENV = 'test'
 
 // ── Mock de global.fetch ──────────────────────────────────────────
 // clients/PromotionsClient.js usa HttpClient que internamente usa fetch.

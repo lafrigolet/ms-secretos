@@ -12,7 +12,7 @@ import { healthRoutes } from './routes/health.js'
 import { registerAuthDecorators } from './middleware/authenticate.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
-process.env.NODE_ENV = 'development'
+process.env.NODE_ENV = 'test'
 process.env.JWT_SECRET = 'test-secret'
 
 async function buildApp () {

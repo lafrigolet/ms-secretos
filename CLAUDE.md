@@ -35,9 +35,12 @@ npm run dev     # hot-reload via node --watch
 
 ```bash
 cp .env.example .env
-docker compose up                  # all services + nginx + frontend
+docker compose up --build          # all services + nginx + frontend (builds from source)
 docker compose up auth-service     # single service
 docker compose build auth-service  # rebuild image after dependency changes
+
+# Production (pulls images from ghcr.io instead of building)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ### Frontend
@@ -87,7 +90,13 @@ Services call each other via HTTP using Docker service names as DNS (e.g., `http
 
 ### SAP Integration
 
-`sap-integration-service` runs in **stub mode** when `NODE_ENV=development` or `SAP_MODE=stub`, returning deterministic fixture data. Set `SAP_MODE=odata` for real SAP connectivity.
+`sap-integration-service` is the **single stub boundary** for the whole platform:
+
+- In `npm test` (`NODE_ENV=test`): each service uses its own local fixture data — no HTTP calls made
+- In `docker compose up` (`NODE_ENV=development`): all services call `sap-integration-service` via HTTP, which returns stub data (`SAP_MODE=stub`)
+- In production (`NODE_ENV=production`): all services call `sap-integration-service`, which connects to real SAP (`SAP_MODE=odata`)
+
+Service clients use `const isStubMode = () => process.env.NODE_ENV === 'test'` — checked at call time (not module load time) to avoid ES module hoisting issues. Test files must set `process.env.NODE_ENV = 'test'` before imports take effect (at the top of the file, before any imports that transitively use it — though due to ESM hoisting, the safest approach is relying on the CI/test environment setting it).
 
 ### Error contract (from CONVENTIONS.md)
 

@@ -1,0 +1,68 @@
+services:
+  frontend:
+    image: ghcr.io/lafrigolet/sda-frontend:latest
+    build: !reset null
+
+  sustainability-service:
+    image: ghcr.io/lafrigolet/sustainability-service:latest
+    build: !reset null
+
+  notification-preferences-service:
+    image: ghcr.io/lafrigolet/notification-preferences-service:latest
+    build: !reset null
+
+  commercial-service:
+    image: ghcr.io/lafrigolet/commercial-service:latest
+    build: !reset null
+
+  intelligence-service:
+    image: ghcr.io/lafrigolet/intelligence-service:latest
+    build: !reset null
+
+  content-service:
+    image: ghcr.io/lafrigolet/content-service:latest
+    build: !reset null
+
+  returns-service:
+    image: ghcr.io/lafrigolet/returns-service:latest
+    build: !reset null
+
+  auth-service:
+    image: ghcr.io/lafrigolet/auth-service:latest
+    build: !reset null
+
+  catalog-service:
+    image: ghcr.io/lafrigolet/catalog-service:latest
+    build: !reset null
+
+  customer-profile-service:
+    image: ghcr.io/lafrigolet/customer-profile-service:latest
+    build: !reset null
+
+  promotions-service:
+    image: ghcr.io/lafrigolet/promotions-service:latest
+    build: !reset null
+
+  cart-service:
+    image: ghcr.io/lafrigolet/cart-service:latest
+    build: !reset null
+
+  order-service:
+    image: ghcr.io/lafrigolet/order-service:latest
+    build: !reset null
+
+  notification-service:
+    image: ghcr.io/lafrigolet/notification-service:latest
+    build: !reset null
+
+  invoice-service:
+    image: ghcr.io/lafrigolet/invoice-service:latest
+    build: !reset null
+
+  audit-service:
+    image: ghcr.io/lafrigolet/audit-service:latest
+    build: !reset null
+
+  sap-integration-service:
+    image: ghcr.io/lafrigolet/sap-integration-service:latest
+    build: !reset null
