@@ -208,7 +208,7 @@ export function MobileCommercialPage () {
             {history.length > 0 && (
               <div className="mt-2">
                 <p className="m-label mb-3">Historial</p>
-                <div style={card} className="divide-y" style={{ ...card }}>
+                <div style={card} className="divide-y">
                   {history.map((sug, i) => {
                     const statusCfg = {
                       ACCEPTED: { label: 'Aceptado',  text: '#4A7054', bg: 'rgba(74,112,84,0.10)' },
