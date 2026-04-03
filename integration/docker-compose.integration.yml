@@ -1,0 +1,67 @@
+# Integration test overrides.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.integration.yml up -d
+#
+# All services already default to NODE_ENV=development and SAP_MODE=stub.
+# This file pins the JWT_SECRET and disables the frontend / dev-stack
+# (not needed for API integration tests).
+
+services:
+  auth-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  catalog-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  customer-profile-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  promotions-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  cart-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  order-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  notification-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  invoice-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  audit-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  returns-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  content-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  intelligence-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  commercial-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  notification-preferences-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  sustainability-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}

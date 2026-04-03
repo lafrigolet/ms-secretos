@@ -14,7 +14,7 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-01 | HTTPS + Let's Encrypt | Now | Low | Free | ⬜ Pending |
 | SE-02 | Nginx security headers | Now | Low | Free | ✅ Done |
 | SE-03 | Hide Nginx version | Now | Low | Free | ✅ Done |
-| SE-04 | Fail2ban on VM | Now | Low | Free | ⬜ Pending |
+| SE-04 | Fail2ban on VM | Now | Low | Free | ✅ Done |
 | SE-05 | Disable root SSH + password auth | Now | Low | Free | ⬜ Pending |
 | SE-06 | Tenant isolation audit | Now | Medium | Free | ✅ Done |
 | SE-07 | Cloudflare free tier (WAF + DDoS) | Soon | Low | Free | ⬜ Pending |
@@ -317,6 +317,7 @@ Run against staging before each major release.
 | CVE / GHSA | Package | Severity | Status | Reason accepted |
 |------------|---------|----------|--------|-----------------|
 | GHSA-mvf2-f6gm-w987 | fast-jwt (via @fastify/jwt) | Critical | No fix available | RSA algorithm confusion attack. Project uses HMAC (`JWT_SECRET`), not RSA keys — attack vector does not apply. Allowlisted via `audit-ci` so all other high/critical vulnerabilities still fail CI. |
+| GHSA-hm7r-c7qw-ghp6 | fast-jwt (via @fastify/jwt) | High | No fix available | Accepts unknown `crit` header extensions (RFC 7515 violation). Project issues tokens internally with HMAC only — no external token input with crafted `crit` headers is trusted. Allowlisted alongside GHSA-mvf2-f6gm-w987. |
 
 ---
 
