@@ -20,6 +20,9 @@ npm test                          # node --test src/app.test.js
 
 # Run a single service via Docker
 ./run-tests.sh auth-service
+
+# Run integration tests (all services via Docker Compose, real HTTP calls)
+bash integration/run-integration-tests.sh
 ```
 
 ### Development (single service, no Docker)

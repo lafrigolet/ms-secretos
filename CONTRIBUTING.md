@@ -98,6 +98,11 @@ git push origin feature/SDA-07-catalog-familias
 | `develop` | 1 | Verde obligatorio |
 | `main` | 2 | Verde obligatorio |
 
+El pipeline de CI tiene tres niveles que deben pasar en orden:
+1. **Unit tests** — `npm test` en cada servicio (rápido, sin Docker)
+2. **Integration tests** — todos los servicios arrancados, llamadas HTTP reales
+3. **Build & deploy** — solo si los dos anteriores son verdes
+
 ---
 
 ## Trabajar en un microservicio de forma aislada

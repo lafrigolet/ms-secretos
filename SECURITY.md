@@ -14,7 +14,7 @@ Each item has an ID (`SE-XX`) for reference in PRs and issues.
 | SE-01 | HTTPS + Let's Encrypt | Now | Low | Free | ⬜ Pending |
 | SE-02 | Nginx security headers | Now | Low | Free | ✅ Done |
 | SE-03 | Hide Nginx version | Now | Low | Free | ✅ Done |
-| SE-04 | Fail2ban on VM | Now | Low | Free | ⬜ Pending |
+| SE-04 | Fail2ban on VM | Now | Low | Free | ✅ Done |
 | SE-05 | Disable root SSH + password auth | Now | Low | Free | ⬜ Pending |
 | SE-06 | Tenant isolation audit | Now | Medium | Free | ✅ Done |
 | SE-07 | Cloudflare free tier (WAF + DDoS) | Soon | Low | Free | ⬜ Pending |

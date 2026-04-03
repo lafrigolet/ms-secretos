@@ -86,6 +86,8 @@ Or run it via Docker as part of the full stack.
 
 ## Running tests
 
+### Unit tests
+
 ```bash
 # Single service — fast, no Docker needed
 cd services/auth-service
@@ -102,6 +104,29 @@ npm test
 Tests use Node's built-in test runner (`node:test`) — no Jest or Mocha. Each service has a single `src/app.test.js`.
 
 **Important:** In-memory data stores are module-level and shared across all tests in a run. Use unique identifiers or relative assertions (`>=`) when test order matters.
+
+### Integration tests
+
+Integration tests run all 16 services together via Docker Compose and make real HTTP calls between them. `sap-integration-service` runs in `SAP_MODE=stub` so fixture data is consistent.
+
+```bash
+# Run the full integration suite (builds images, starts services, runs tests, tears down)
+bash integration/run-integration-tests.sh
+```
+
+**Requirements:** Docker and Docker Compose must be running. The script handles everything else — no manual service startup needed.
+
+**How it differs from unit tests:**
+
+| | Unit tests | Integration tests |
+|--|--|--|
+| Transport | `app.inject()` (in-process) | Real HTTP (`fetch()`) |
+| Dependencies | Stubbed locally | Real services via Docker |
+| SAP data | Local fixture constants | `sap-integration-service` stubs |
+| Speed | Fast (~seconds) | Slower (~2–3 minutes) |
+| Run with | `npm test` | `run-integration-tests.sh` |
+
+Integration tests call services directly on their ports (bypassing Nginx) to avoid rate-limiting on the login endpoint. They run serially (`--test-concurrency=1`) to prevent in-memory state collisions between test files.
 
 ## Service ports
 
