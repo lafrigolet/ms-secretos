@@ -26,6 +26,7 @@ SERVICES=(
   commercial-service
   notification-preferences-service
   sustainability-service
+  subscription-service
 )
 
 if [ -n "$1" ]; then

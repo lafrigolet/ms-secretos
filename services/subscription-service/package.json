@@ -1,0 +1,21 @@
+{
+  "name": "sda-subscription-service",
+  "version": "1.0.0",
+  "description": "Secretos del Agua — subscription-service",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "node --test src/app.test.js"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "@fastify/jwt": "^10.0.0",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "pino-pretty": "^13.0.0"
+  }
+}

@@ -52,6 +52,30 @@ services:
       - sda-network
     restart: unless-stopped
 
+  # ── Subscription Service ─────────────────────────────────────────
+  subscription-service:
+    build:
+      context: ./services/subscription-service
+      dockerfile: Dockerfile
+    expose:
+      - "3017"
+    ports:
+      - "3017:3017"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=3017
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+      - PAYMENT_MODE=${PAYMENT_MODE:-stub}
+    networks:
+      - sda-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3017/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   # ── Sustainability Service ────────────────────────────────────────
   sustainability-service:
     build:

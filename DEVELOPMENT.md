@@ -159,6 +159,7 @@ npm run audit -- auth-service
 | commercial-service | 3014 | http://localhost:3014/docs |
 | notification-preferences-service | 3015 | http://localhost:3015/docs |
 | sustainability-service | 3016 | http://localhost:3016/docs |
+| subscription-service | 3017 | http://localhost:3017/docs |
 | frontend | 5173 | — |
 | dev-stack dashboard | 5174 | — |
 

@@ -132,6 +132,7 @@ All errors return `{ error: "UPPER_SNAKE_CASE", message: "..." }` with optional 
 | commercial-service               | 3014 |
 | notification-preferences-service | 3015 |
 | sustainability-service           | 3016 |
+| subscription-service             | 3017 |
 | frontend                         | 5173 |
 | dev-stack dashboard              | 5174 |
 
