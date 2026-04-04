@@ -52,7 +52,14 @@ done
 
 echo ""
 echo "▶  Running integration tests…"
-node --test --test-concurrency=1 integration/tests/*.test.js
+# Optional first argument: service name (e.g. "catalog-service" or "catalog" runs catalog.test.js)
+if [ -n "${1:-}" ]; then
+  TEST_NAME="${1%-service}"  # strip trailing -service if present
+  TEST_GLOB="integration/tests/${TEST_NAME}.test.js"
+else
+  TEST_GLOB="integration/tests/*.test.js"
+fi
+node --test --test-concurrency=1 $TEST_GLOB
 TEST_EXIT=$?
 
 echo ""
