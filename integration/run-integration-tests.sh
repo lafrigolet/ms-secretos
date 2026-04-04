@@ -18,6 +18,7 @@ HEALTH_CHECKS=(
   "3006/health"   # order-service
   "3009/health"   # audit-service
   "3010/health"   # sap-integration-service
+  "3017/health"   # subscription-service
 )
 
 ELAPSED=0

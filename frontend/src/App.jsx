@@ -17,7 +17,8 @@ import { TrainingPage }       from './pages/TrainingPage.jsx'
 import { IntelligencePage }   from './pages/IntelligencePage.jsx'
 import { CommercialPage }     from './pages/CommercialPage.jsx'
 import { NotificationsPage }  from './pages/NotificationsPage.jsx'
-import { SustainabilityPage } from './pages/SustainabilityPage.jsx'
+import { SustainabilityPage }  from './pages/SustainabilityPage.jsx'
+import { SubscriptionPage }    from './pages/SubscriptionPage.jsx'
 
 // Mobile layout + pages
 import { MobileLayout }             from './components/mobile/MobileLayout.jsx'
@@ -34,6 +35,7 @@ import { MobileIntelligencePage }   from './pages/mobile/MobileIntelligencePage.
 import { MobileCommercialPage }     from './pages/mobile/MobileCommercialPage.jsx'
 import { MobileNotificationsPage }  from './pages/mobile/MobileNotificationsPage.jsx'
 import { MobileSustainabilityPage } from './pages/mobile/MobileSustainabilityPage.jsx'
+import { MobileSubscriptionPage }  from './pages/mobile/MobileSubscriptionPage.jsx'
 
 function AppRoutes () {
   const isMobile = useIsMobile()
@@ -75,6 +77,9 @@ function AppRoutes () {
         } />
         <Route path="/sustainability" element={
           <ProtectedRoute><MobileLayout><MobileSustainabilityPage /></MobileLayout></ProtectedRoute>
+        } />
+        <Route path="/subscription" element={
+          <ProtectedRoute><MobileLayout><MobileSubscriptionPage /></MobileLayout></ProtectedRoute>
         } />
         <Route path="/admin" element={
           <ProtectedRoute adminOnly><MobileLayout><MobileAdminPage /></MobileLayout></ProtectedRoute>
@@ -122,6 +127,9 @@ function AppRoutes () {
       } />
       <Route path="/sustainability" element={
         <ProtectedRoute><Layout><SustainabilityPage /></Layout></ProtectedRoute>
+      } />
+      <Route path="/subscription" element={
+        <ProtectedRoute><Layout><SubscriptionPage /></Layout></ProtectedRoute>
       } />
       <Route path="/admin" element={
         <ProtectedRoute adminOnly><Layout><AdminPage /></Layout></ProtectedRoute>

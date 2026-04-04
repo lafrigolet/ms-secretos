@@ -20,6 +20,7 @@ export const PORTS = {
   commercial:     3014,
   notifPrefs:     3015,
   sustainability: 3016,
+  subscriptions:  3017,
 }
 
 const HOST = process.env.INTEGRATION_HOST ?? 'localhost'

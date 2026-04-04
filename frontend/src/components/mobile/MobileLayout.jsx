@@ -11,6 +11,7 @@ const MORE_LINKS = [
   { to: '/commercial',     icon: '👤', label: 'Mi comercial',  color: '#F4EDE4', tint: '#8C6E52' },
   { to: '/notifications',  icon: '🔔', label: 'Notificaciones',color: '#F7F3E8', tint: '#B8963C' },
   { to: '/sustainability', icon: '🌿', label: 'Sostenibilidad',color: '#EEF4EA', tint: '#4A7054' },
+  { to: '/subscription',  icon: '💳', label: 'Suscripción',   color: '#F7F3E8', tint: '#B8963C' },
 ]
 
 const MORE_PATHS = MORE_LINKS.map(l => l.to)
@@ -238,7 +239,8 @@ function TopBar ({ showBack }) {
     '/commercial':     'Mi comercial',
     '/notifications':  'Notificaciones',
     '/sustainability': 'Sostenibilidad',
-    '/admin':          'Administración',
+    '/subscription':  'Suscripción',
+    '/admin':         'Administración',
   }
   const isProductPage = /^\/catalog\/.+/.test(location.pathname)
   const titleFromMap  = titleMap[location.pathname]
@@ -294,7 +296,7 @@ function TopBar ({ showBack }) {
   )
 }
 
-const SUB_PAGES = ['/catalog/', '/returns/new', '/cart', '/orders', '/returns', '/training', '/intelligence', '/commercial', '/notifications', '/sustainability', '/admin']
+const SUB_PAGES = ['/catalog/', '/returns/new', '/cart', '/orders', '/returns', '/training', '/intelligence', '/commercial', '/notifications', '/sustainability', '/subscription', '/admin']
 
 export function MobileLayout ({ children }) {
   const location = useLocation()

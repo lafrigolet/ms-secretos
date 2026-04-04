@@ -65,3 +65,7 @@ services:
   sustainability-service:
     environment:
       - JWT_SECRET=${JWT_SECRET:-integration-test-secret}
+
+  subscription-service:
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-integration-test-secret}

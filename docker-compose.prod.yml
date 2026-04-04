@@ -66,3 +66,7 @@ services:
   sap-integration-service:
     image: ghcr.io/lafrigolet/sap-integration-service:latest
     build: !reset null
+
+  subscription-service:
+    image: ghcr.io/lafrigolet/subscription-service:latest
+    build: !reset null

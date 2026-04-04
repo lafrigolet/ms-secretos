@@ -17,7 +17,8 @@ const SERVICES = [
   { name: 'intelligence-service',     healthUrl: '/api/intelligence-health',  docsUrl: 'http://localhost:3013/docs' },
   { name: 'commercial-service',       healthUrl: '/api/commercial-health',    docsUrl: 'http://localhost:3014/docs' },
   { name: 'notification-preferences-service', healthUrl: '/api/notif-prefs-health', docsUrl: 'http://localhost:3015/docs' },
-  { name: 'sustainability-service',   healthUrl: '/api/sustainability-health', docsUrl: 'http://localhost:3016/docs' },
+  { name: 'sustainability-service',   healthUrl: '/api/sustainability-health',  docsUrl: 'http://localhost:3016/docs' },
+  { name: 'subscription-service',    healthUrl: '/api/subscriptions-health',   docsUrl: 'http://localhost:3017/docs' },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────
@@ -382,6 +383,30 @@ function SustainabilitySection ({ token }) {
   )
 }
 
+function SubscriptionSection ({ token }) {
+  const { result, loading, call } = useApiCall()
+  return (
+    <div style={s.card}>
+      <div style={s.sectionHeader}><h2 style={s.h2}>subscription-service</h2>{hu('SaaS billing')}</div>
+      {!token && <p style={{ color: '#f87171', fontSize: 12, marginBottom: 12 }}>⚠️ Haz login primero</p>}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/subscriptions/plans', 'GET', null, token)} disabled={loading || !token}>Planes disponibles</button>
+        <button style={s.btn('#1e3a5f')} onClick={() => call('/api/subscriptions/me', 'GET', null, token)} disabled={loading || !token}>Mi suscripción</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/subscriptions/', 'POST', { planId: 'plan-pro' }, token)} disabled={loading || !token}>Suscribirse — Pro</button>
+        <button style={s.btn('#14532d')} onClick={() => call('/api/subscriptions/', 'POST', { planId: 'plan-basic' }, token)} disabled={loading || !token}>Suscribirse — Basic</button>
+        <button style={s.btn('#78350f')} onClick={() => call('/api/subscriptions/me', 'PATCH', { planId: 'plan-enterprise' }, token)} disabled={loading || !token}>Cambiar a Enterprise</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/subscriptions/me/billing', 'GET', null, token)} disabled={loading || !token}>Historial facturación</button>
+        <button style={s.btn('#1e4040')} onClick={() => call('/api/subscriptions/me/payment-method', 'POST', { paymentMethod: 'card_test_4242' }, token)} disabled={loading || !token}>Actualizar método pago</button>
+        <button style={s.btn('#7f1d1d')} onClick={() => call('/api/subscriptions/me', 'DELETE', null, token)} disabled={loading || !token}>Cancelar suscripción</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/subscriptions/admin', 'GET', null, token)} disabled={loading || !token}>Admin — todas</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/subscriptions/admin/SDA-00423', 'GET', null, token)} disabled={loading || !token}>Admin — SDA-00423</button>
+        <button style={s.btn('#4a2970')} onClick={() => call('/api/subscriptions/admin/SDA-00387', 'PATCH', { planId: 'plan-enterprise', status: 'TRIALING' }, token)} disabled={loading || !token}>Admin — conceder Enterprise</button>
+      </div>
+      <Result result={result} />
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────
 export default function App () {
   const [token, setToken]     = useState(null)
@@ -439,6 +464,7 @@ export default function App () {
       <CommercialSection token={token} />
       <NotificationsSection token={token} />
       <SustainabilitySection token={token} />
+      <SubscriptionSection token={token} />
     </div>
   )
 }
