@@ -89,16 +89,14 @@ Or run it via Docker as part of the full stack.
 ### Unit tests
 
 ```bash
-# Single service — fast, no Docker needed
-cd services/auth-service
-npm install
-npm test
+# All services
+npm run unittest
 
-# All services — runs in Docker containers
-./run-tests.sh
+# Single service
+npm run unittest -- auth-service
 
-# Single service via Docker
-./run-tests.sh auth-service
+# Without Docker (fast, no dependencies)
+cd services/auth-service && npm test
 ```
 
 Tests use Node's built-in test runner (`node:test`) — no Jest or Mocha. Each service has a single `src/app.test.js`.
@@ -110,11 +108,14 @@ Tests use Node's built-in test runner (`node:test`) — no Jest or Mocha. Each s
 Integration tests run all 16 services together via Docker Compose and make real HTTP calls between them. `sap-integration-service` runs in `SAP_MODE=stub` so fixture data is consistent.
 
 ```bash
-# Run the full integration suite (builds images, starts services, runs tests, tears down)
-bash integration/run-integration-tests.sh
+# Full suite
+npm run integrationtest
+
+# Single service
+npm run integrationtest -- catalog-service
 ```
 
-**Requirements:** Docker and Docker Compose must be running. The script handles everything else — no manual service startup needed.
+**Requirements:** Docker and Docker Compose must be running. The script handles everything else — no manual startup needed.
 
 **How it differs from unit tests:**
 
@@ -124,9 +125,19 @@ bash integration/run-integration-tests.sh
 | Dependencies | Stubbed locally | Real services via Docker |
 | SAP data | Local fixture constants | `sap-integration-service` stubs |
 | Speed | Fast (~seconds) | Slower (~2–3 minutes) |
-| Run with | `npm test` | `run-integration-tests.sh` |
+| Run with | `npm run unittest` | `npm run integrationtest` |
 
 Integration tests call services directly on their ports (bypassing Nginx) to avoid rate-limiting on the login endpoint. They run serially (`--test-concurrency=1`) to prevent in-memory state collisions between test files.
+
+### Security audit
+
+```bash
+# All services
+npm run audit
+
+# Single service
+npm run audit -- auth-service
+```
 
 ## Service ports
 
@@ -160,6 +171,7 @@ Integration tests call services directly on their ports (bypassing Nginx) to avo
 5. Add to the `SERVICES` array in `run-tests.sh`
 6. Add to the matrix in `.github/workflows/deploy.yml`
 7. Update the port table in this file and in `README.md`
+
 
 ## Code conventions
 

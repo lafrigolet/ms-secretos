@@ -1,0 +1,9 @@
+{
+  "name": "ms-secretos",
+  "private": true,
+  "scripts": {
+    "unittest": "bash run-tests.sh",
+    "integrationtest": "bash -c 'bash integration/run-integration-tests.sh \"$1\"' --",
+    "audit": "bash -c 'if [ -n \"$1\" ]; then cd \"services/$1\" && npx --yes audit-ci --high --allowlist GHSA-mvf2-f6gm-w987 --allowlist GHSA-hm7r-c7qw-ghp6; else for d in services/*/; do echo \"=== $d ===\" && (cd \"$d\" && npx --yes audit-ci --high --allowlist GHSA-mvf2-f6gm-w987 --allowlist GHSA-hm7r-c7qw-ghp6); done; fi' --"
+  }
+}
