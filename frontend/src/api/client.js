@@ -12,7 +12,8 @@ function getToken () {
 }
 
 async function request (method, path, { body, auth = true } = {}) {
-  const headers = { 'Content-Type': 'application/json' }
+  const headers = {}
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
   if (auth) {
     const token = getToken()
     if (token) headers['Authorization'] = `Bearer ${token}`

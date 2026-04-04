@@ -26,13 +26,21 @@ export function useCart () {
   }, [])
 
   const updateItem = useCallback(async (productCode, quantity) => {
-    const data = await cartApi.updateItem(productCode, quantity)
-    setCart(data)
+    try {
+      const data = await cartApi.updateItem(productCode, quantity)
+      setCart(data)
+    } catch {
+      console.error('updateItem failed')
+    }
   }, [])
 
   const removeItem = useCallback(async (productCode) => {
-    const data = await cartApi.removeItem(productCode)
-    setCart(data)
+    try {
+      const data = await cartApi.removeItem(productCode)
+      setCart(data)
+    } catch {
+      console.error('removeItem failed')
+    }
   }, [])
 
   const clearCart = useCallback(async () => {

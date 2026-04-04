@@ -51,7 +51,8 @@ export function CartPage () {
       setOrderResult(order)
       setConfirmed(true)
     } catch (err) {
-      alert('Error al confirmar el pedido. Inténtalo de nuevo.')
+      console.error('createOrder failed:', err)
+      alert(`Error al confirmar el pedido: ${err.message ?? 'Inténtalo de nuevo.'}`)
     } finally {
       setConfirming(false)
     }

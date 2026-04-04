@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAsync } from '../hooks/useAsync.js'
 import { ordersApi, invoicesApi } from '../api/index.js'
@@ -32,9 +33,43 @@ function IconBtn ({ onClick, title, children }) {
   )
 }
 
+function RepeatCartModal ({ order, onAdd, onReplace, onCancel }) {
+  return (
+    <div className="fixed inset-0 bg-charcoal/60 flex items-center justify-center z-50 p-4" onClick={onCancel}>
+      <div className="bg-off-white rounded-2xl p-8 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+        <h2 className="font-serif text-xl font-light text-charcoal mb-2">Tu cesta tiene artículos</h2>
+        <p className="text-sm text-muted mb-6">
+          ¿Qué deseas hacer con los artículos del pedido <span className="font-medium text-charcoal">{order.orderId}</span>?
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onAdd}
+            className="btn-primary w-full"
+          >
+            Añadir a la cesta
+          </button>
+          <button
+            onClick={onReplace}
+            className="btn-secondary w-full"
+          >
+            Reemplazar la cesta
+          </button>
+          <button
+            onClick={onCancel}
+            className="btn-ghost w-full text-sm text-muted"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function OrdersPage () {
   const navigate = useNavigate()
-  const { addItem, clearCart } = useCartContext()
+  const { cart, addItem, clearCart } = useCartContext()
+  const [repeatModal, setRepeatModal] = useState(null) // { order, items }
 
   // HU-18 — historial de pedidos
   const { data: orders, loading, error } = useAsync(() => ordersApi.getOrders(), [])
@@ -46,8 +81,21 @@ export function OrdersPage () {
   async function handleRepeat (order) {
     try {
       const result = await ordersApi.repeatOrder(order.orderId)
-      await clearCart()
-      for (const item of result.items) {
+      if (cart.items.length > 0) {
+        setRepeatModal({ order, items: result.items })
+      } else {
+        await loadRepeatItems(result.items)
+      }
+    } catch {
+      alert('No se pudo cargar el pedido en la cesta.')
+    }
+  }
+
+  async function loadRepeatItems (items, replace = false) {
+    setRepeatModal(null)
+    try {
+      if (replace) await clearCart()
+      for (const item of items) {
         await addItem(
           { sapCode: item.productCode, name: item.name, price: item.unitPrice },
           item.quantity
@@ -76,6 +124,16 @@ export function OrdersPage () {
 
   return (
     <div>
+      {/* Repeat cart modal */}
+      {repeatModal && (
+        <RepeatCartModal
+          order={repeatModal.order}
+          onAdd={() => loadRepeatItems(repeatModal.items, false)}
+          onReplace={() => loadRepeatItems(repeatModal.items, true)}
+          onCancel={() => setRepeatModal(null)}
+        />
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="page-title">Mis pedidos</h1>

@@ -40,8 +40,9 @@ export function MobileCartPage () {
       const order = await ordersApi.createOrder(items)
       await clearCart()
       setOrderResult(order)
-    } catch {
-      alert('Error al confirmar el pedido.')
+    } catch (err) {
+      console.error('createOrder failed:', err)
+      alert(`Error al confirmar el pedido: ${err.message ?? 'Inténtalo de nuevo.'}`)
     } finally {
       setConfirming(false)
     }
