@@ -11,7 +11,7 @@ describe('subscription-service — integration', () => {
 
   before(async () => {
     tokenCustomer = await login('SDA-00423', 'demo1234')
-    tokenAdmin    = await login('SDA-ADMIN-001', 'admin1234')
+    tokenAdmin    = await login('ADMIN-001', 'admin1234')
     tokenOther    = await login('SDA-00521', 'demo1234')
   })
 
