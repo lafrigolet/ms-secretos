@@ -317,6 +317,7 @@ Run against staging before each major release.
 | CVE / GHSA | Package | Severity | Status | Reason accepted |
 |------------|---------|----------|--------|-----------------|
 | GHSA-mvf2-f6gm-w987 | fast-jwt (via @fastify/jwt) | Critical | No fix available | RSA algorithm confusion attack. Project uses HMAC (`JWT_SECRET`), not RSA keys — attack vector does not apply. Allowlisted via `audit-ci` so all other high/critical vulnerabilities still fail CI. |
+| GHSA-hm7r-c7qw-ghp6 | fast-jwt (via @fastify/jwt) | High | No fix available | Accepts unknown `crit` header extensions (RFC 7515 violation). Project issues tokens internally with HMAC only — no external token input with crafted `crit` headers is trusted. Allowlisted alongside GHSA-mvf2-f6gm-w987. |
 
 ---
 

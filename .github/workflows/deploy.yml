@@ -52,9 +52,10 @@ jobs:
       - name: Audit dependencies
         working-directory: services/${{ matrix.service }}
         # GHSA-mvf2-f6gm-w987: fast-jwt RSA algorithm confusion, no fix available.
-        # Project uses HMAC only — attack vector does not apply. Allowlisted specifically
-        # so all other high/critical vulnerabilities still fail the build.
-        run: npx --yes audit-ci --high --allowlist GHSA-mvf2-f6gm-w987
+        # GHSA-hm7r-c7qw-ghp6: fast-jwt accepts unknown crit header extensions, no fix available.
+        # Both affect fast-jwt <=6.1.0. Project uses HMAC only — neither attack vector applies.
+        # Allowlisted specifically so all other high/critical vulnerabilities still fail the build.
+        run: npx --yes audit-ci --high --allowlist GHSA-mvf2-f6gm-w987 --allowlist GHSA-hm7r-c7qw-ghp6
 
       - name: Run tests
         working-directory: services/${{ matrix.service }}
