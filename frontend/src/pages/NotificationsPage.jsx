@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
 import { notifApi } from '../api/index.js'
 import { Spinner } from '../components/Spinner.jsx'
@@ -82,17 +82,26 @@ function InboxTab () {
 
 // ── HU-51 — Preferencias ─────────────────────────────────────────
 function PreferencesTab () {
-  const { data, loading, refetch } = useAsync(() => notifApi.getPreferences(), [])
-  const [saving, setSaving] = useState(false)
+  const { data, loading } = useAsync(() => notifApi.getPreferences(), [])
+  const [localPrefs, setLocalPrefs] = useState(null)
+
+  useEffect(() => {
+    if (data?.preferences) setLocalPrefs(data.preferences)
+  }, [data])
 
   async function handleToggle (type, channel) {
-    setSaving(true)
+    const prev = localPrefs
+    const newPrefs = {
+      ...localPrefs,
+      [type]: { ...localPrefs[type], [channel]: !localPrefs[type][channel] }
+    }
+    setLocalPrefs(newPrefs)
     try {
-      const current = data.preferences[type][channel]
-      await notifApi.updatePreferences({ [type]: { [channel]: !current } })
-      refetch()
-    } catch { alert('Error al guardar las preferencias') }
-    finally { setSaving(false) }
+      await notifApi.updatePreferences({ [type]: { [channel]: newPrefs[type][channel] } })
+    } catch {
+      setLocalPrefs(prev)
+      alert('Error al guardar las preferencias')
+    }
   }
 
   if (loading) return <div className="flex justify-center py-8"><Spinner /></div>
@@ -123,18 +132,17 @@ function PreferencesTab () {
               <p className="text-xs text-muted leading-relaxed">{type.description}</p>
             </div>
             {Object.keys(CHANNEL_LABELS).map(ch => {
-              const enabled = data?.preferences?.[type.id]?.[ch] ?? false
+              const enabled = localPrefs?.[type.id]?.[ch] ?? false
               return (
                 <div key={ch} className="w-16 flex justify-center">
                   <button
                     onClick={() => handleToggle(type.id, ch)}
-                    disabled={saving}
                     className={`w-10 h-6 rounded-full transition-colors relative border-0 cursor-pointer ${
                       enabled ? 'bg-sage-dark' : 'bg-cream border border-border'
                     }`}
                   >
-                    <span className={`absolute top-0.5 w-5 h-5 bg-off-white rounded-full shadow-sm transition-transform ${
-                      enabled ? 'translate-x-4' : 'translate-x-0.5'
+                    <span className={`absolute top-0.5 left-0 w-5 h-5 bg-off-white rounded-full shadow-sm transition-transform ${
+                      enabled ? 'translate-x-[18px]' : 'translate-x-0.5'
                     }`} />
                   </button>
                 </div>

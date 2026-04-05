@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { notifApi } from '../../api/index.js'
 import { Spinner } from '../../components/Spinner.jsx'
@@ -108,23 +108,33 @@ function Toggle ({ checked, onChange }) {
     <button onClick={onChange}
       className="flex-shrink-0 w-11 h-6  relative transition-colors"
       style={{ background: checked ? 'linear-gradient(135deg,#4A5740,#6B7B5E)' : '#E2DDD6' }}>
-      <span className="absolute top-0.5 w-5 h-5 bg-white  shadow-sm transition-transform"
+      <span className="absolute top-0.5 left-0 w-5 h-5 bg-white shadow-sm transition-transform"
         style={{ transform: checked ? 'translateX(22px)' : 'translateX(2px)' }} />
     </button>
   )
 }
 
 function PreferencesTab () {
-  const { data, loading, refetch } = useAsync(() => notifApi.getPreferences(), [])
-  const [saving, setSaving] = useState(false)
+  const { data, loading } = useAsync(() => notifApi.getPreferences(), [])
+  const [localPrefs, setLocalPrefs] = useState(null)
+
+  useEffect(() => {
+    if (data?.preferences) setLocalPrefs(data.preferences)
+  }, [data])
 
   async function handleToggle (type, channel) {
-    setSaving(true)
+    const prev = localPrefs
+    const newPrefs = {
+      ...localPrefs,
+      [type]: { ...localPrefs[type], [channel]: !localPrefs[type][channel] }
+    }
+    setLocalPrefs(newPrefs)
     try {
-      await notifApi.updatePreferences({ [type]: { [channel]: !data.preferences[type][channel] } })
-      refetch()
-    } catch { alert('Error al guardar') }
-    finally { setSaving(false) }
+      await notifApi.updatePreferences({ [type]: { [channel]: newPrefs[type][channel] } })
+    } catch {
+      setLocalPrefs(prev)
+      alert('Error al guardar')
+    }
   }
 
   if (loading) return <div className="flex justify-center py-10"><Spinner /></div>
@@ -151,7 +161,7 @@ function PreferencesTab () {
               </div>
               <div className="flex gap-4">
                 {Object.entries(CHANNEL_LABELS).map(([ch, label]) => {
-                  const enabled = data?.preferences?.[type.id]?.[ch] ?? false
+                  const enabled = localPrefs?.[type.id]?.[ch] ?? false
                   return (
                     <div key={ch} className="flex items-center gap-2">
                       <Toggle checked={enabled} onChange={() => handleToggle(type.id, ch)} />
