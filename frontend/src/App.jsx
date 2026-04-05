@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute.jsx'
@@ -41,6 +41,38 @@ const MobileNotificationsPage  = lazy(() => import('./pages/mobile/MobileNotific
 const MobileSustainabilityPage = lazy(() => import('./pages/mobile/MobileSustainabilityPage.jsx').then(m => ({ default: m.MobileSustainabilityPage })))
 const MobileSubscriptionPage   = lazy(() => import('./pages/mobile/MobileSubscriptionPage.jsx').then(m => ({ default: m.MobileSubscriptionPage })))
 
+const prefetchDesktop = () => {
+  import('./pages/LoginPage.jsx')
+  import('./pages/ProductPage.jsx')
+  import('./pages/CartPage.jsx')
+  import('./pages/OrdersPage.jsx')
+  import('./pages/ReturnsPage.jsx')
+  import('./pages/NewReturnPage.jsx')
+  import('./pages/TrainingPage.jsx')
+  import('./pages/IntelligencePage.jsx')
+  import('./pages/CommercialPage.jsx')
+  import('./pages/NotificationsPage.jsx')
+  import('./pages/SustainabilityPage.jsx')
+  import('./pages/SubscriptionPage.jsx')
+  import('./pages/AdminPage.jsx')
+}
+
+const prefetchMobile = () => {
+  import('./pages/mobile/MobileLoginPage.jsx')
+  import('./pages/mobile/MobileProductPage.jsx')
+  import('./pages/mobile/MobileCartPage.jsx')
+  import('./pages/mobile/MobileOrdersPage.jsx')
+  import('./pages/mobile/MobileReturnsPage.jsx')
+  import('./pages/mobile/MobileNewReturnPage.jsx')
+  import('./pages/mobile/MobileTrainingPage.jsx')
+  import('./pages/mobile/MobileIntelligencePage.jsx')
+  import('./pages/mobile/MobileCommercialPage.jsx')
+  import('./pages/mobile/MobileNotificationsPage.jsx')
+  import('./pages/mobile/MobileSustainabilityPage.jsx')
+  import('./pages/mobile/MobileSubscriptionPage.jsx')
+  import('./pages/mobile/MobileAdminPage.jsx')
+}
+
 const fallback = (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
     <Spinner size="lg" />
@@ -49,6 +81,14 @@ const fallback = (
 
 function AppRoutes () {
   const isMobile = useIsMobile()
+
+  useEffect(() => {
+    const id = requestIdleCallback(
+      () => (isMobile ? prefetchMobile : prefetchDesktop)(),
+      { timeout: 3000 }
+    )
+    return () => cancelIdleCallback(id)
+  }, [isMobile])
 
   if (isMobile) {
     return (
