@@ -89,6 +89,29 @@ describe('order-service — integration', () => {
       })
       assert.equal(status, 400)
     })
+
+    test('quantity exceeding stock returns 409 OUT_OF_STOCK', async () => {
+      const { status, body } = await post(P, '/orders', {
+        token: tokenA,
+        body: {
+          items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 99999, unitPrice: 16.00 }]
+        }
+      })
+      assert.equal(status, 409)
+      assert.equal(body.error, 'OUT_OF_STOCK')
+      assert.equal(body.productCode, 'P-RT-001')
+    })
+
+    test('OUT_OF_STOCK response includes available quantity', async () => {
+      const { body } = await post(P, '/orders', {
+        token: tokenA,
+        body: {
+          items: [{ productCode: 'P-RT-001', name: 'Champú', quantity: 99999, unitPrice: 16.00 }]
+        }
+      })
+      assert.ok(typeof body.available === 'number')
+      assert.ok(body.available < 99999)
+    })
   })
 
   // ── HU-19 — Order detail ───────────────────────────────────────

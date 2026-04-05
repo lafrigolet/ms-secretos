@@ -130,6 +130,20 @@ export class StubAdapter {
 
   async createOrder (sapCode, items) {
     this.#logStub('createOrder', `${sapCode}, items:${items.length}`)
+
+    // Verificar stock disponible para cada producto
+    for (const item of items) {
+      const available = STOCK[item.productCode] ?? 0
+      if (item.quantity > available) {
+        const err = new Error(`Stock insuficiente para ${item.productCode}`)
+        err.code = 'OUT_OF_STOCK'
+        err.productCode = item.productCode
+        err.requested = item.quantity
+        err.available = available
+        throw err
+      }
+    }
+
     // En modo stub simulamos la creación devolviendo un ID ficticio
     const orderId = `SDA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`
     return {

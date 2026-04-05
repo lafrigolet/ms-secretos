@@ -723,6 +723,53 @@ describe('Orders', () => {
     assert.equal(res.statusCode, 400)
   })
 
+  test('POST /internal/orders — stock insuficiente → 409 OUT_OF_STOCK', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/internal/orders',
+      payload: {
+        sapCode: 'SDA-00423',
+        items: [{ productCode: 'P-RT-001', quantity: 99999, unitPrice: 16.00 }]
+      }
+    })
+    assert.equal(res.statusCode, 409)
+    const body = res.json()
+    assert.equal(body.error, 'OUT_OF_STOCK')
+    assert.equal(body.productCode, 'P-RT-001')
+  })
+
+  test('POST /internal/orders — OUT_OF_STOCK incluye requested y available', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/internal/orders',
+      payload: {
+        sapCode: 'SDA-00423',
+        items: [{ productCode: 'P-RT-001', quantity: 99999, unitPrice: 16.00 }]
+      }
+    })
+    const body = res.json()
+    assert.equal(body.requested, 99999)
+    assert.equal(body.available, 240)
+  })
+
+  test('POST /internal/orders — producto sin stock (qty>0, stock=0) → 409', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST',
+      url: '/internal/orders',
+      payload: {
+        sapCode: 'SDA-00423',
+        // código inexistente → stock=0 en STOCK
+        items: [{ productCode: 'P-NOEXISTE', quantity: 1, unitPrice: 10.00 }]
+      }
+    })
+    assert.equal(res.statusCode, 409)
+    assert.equal(res.json().error, 'OUT_OF_STOCK')
+    assert.equal(res.json().available, 0)
+  })
+
   test('GET /internal/orders/invoice/:invoiceId — factura existente', async () => {
     const app = await buildApp()
     const res = await app.inject({ method: 'GET', url: '/internal/orders/invoice/FAC-2025-0890' })

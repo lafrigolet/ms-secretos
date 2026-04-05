@@ -36,7 +36,15 @@ export class HttpClient {
     if (res.status === 404) return null
     if (!res.ok) {
       const text = await res.text().catch(() => '')
-      throw new Error(`${method} ${url} → ${res.status}: ${text}`)
+      let body = null
+      try { body = JSON.parse(text) } catch { /* body no es JSON */ }
+      const err = new Error(body?.message ?? `${method} ${url} → ${res.status}: ${text}`)
+      err.status = res.status
+      if (body?.error)      err.code        = body.error
+      if (body?.productCode !== undefined) err.productCode = body.productCode
+      if (body?.requested  !== undefined)  err.requested   = body.requested
+      if (body?.available  !== undefined)  err.available   = body.available
+      throw err
     }
 
     return res.json()

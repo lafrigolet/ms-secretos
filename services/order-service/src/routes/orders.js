@@ -38,7 +38,21 @@ export async function orderRoutes (fastify) {
       }
     }
   }, async (request, reply) => {
-    const order = await sap.createOrder(request.user.sub, request.body.items)
+    let order
+    try {
+      order = await sap.createOrder(request.user.sub, request.body.items)
+    } catch (err) {
+      if (err.code === 'OUT_OF_STOCK') {
+        return reply.status(409).send({
+          error: 'OUT_OF_STOCK',
+          message: `Stock insuficiente para el producto ${err.productCode}`,
+          productCode: err.productCode,
+          requested: err.requested,
+          available: err.available
+        })
+      }
+      throw err
+    }
 
     // Fire-and-forget — no bloqueamos la respuesta
     notification.orderConfirmed(order, request.user)

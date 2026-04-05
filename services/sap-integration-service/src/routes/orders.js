@@ -68,8 +68,21 @@ export async function orderRoutes (fastify) {
     }
   }, async (request, reply) => {
     const { sapCode, items } = request.body
-    const order = await sap.createOrder(sapCode, items)
-    return reply.status(201).send(order)
+    try {
+      const order = await sap.createOrder(sapCode, items)
+      return reply.status(201).send(order)
+    } catch (err) {
+      if (err.code === 'OUT_OF_STOCK') {
+        return reply.status(409).send({
+          error: 'OUT_OF_STOCK',
+          message: `Stock insuficiente para el producto ${err.productCode}`,
+          productCode: err.productCode,
+          requested: err.requested,
+          available: err.available
+        })
+      }
+      throw err
+    }
   })
 
   // Factura de un pedido

@@ -395,6 +395,27 @@ describe('HU-17 — Confirmar pedido', () => {
     })
     assert.equal(res.json().error, 'VALIDATION_ERROR')
   })
+
+  test('stock insuficiente → 409 OUT_OF_STOCK', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: '/orders',
+      headers: { authorization: `Bearer ${token(app)}` },
+      payload: { items: [{ productCode: 'P-OUT-OF-STOCK', quantity: 1, unitPrice: 10 }] }
+    })
+    assert.equal(res.statusCode, 409)
+    assert.equal(res.json().error, 'OUT_OF_STOCK')
+  })
+
+  test('OUT_OF_STOCK incluye productCode en la respuesta', async () => {
+    const app = await buildApp()
+    const res = await app.inject({
+      method: 'POST', url: '/orders',
+      headers: { authorization: `Bearer ${token(app)}` },
+      payload: { items: [{ productCode: 'P-OUT-OF-STOCK', quantity: 5, unitPrice: 10 }] }
+    })
+    assert.equal(res.json().productCode, 'P-OUT-OF-STOCK')
+  })
 })
 
 // ══════════════════════════════════════════════════════════════════

@@ -41,6 +41,22 @@ export class ODataAdapter {
 
     if (!res.ok) {
       const text = await res.text()
+      let errorData = null
+      try { errorData = JSON.parse(text) } catch { /* body no es JSON */ }
+
+      // SAP OData devuelve errores de stock con código ZSD_ORDERS/OUT_OF_STOCK
+      // y detalles en innererror: { ProductCode, Requested, Available }
+      const sapCode = errorData?.error?.code ?? ''
+      if (res.status === 409 || sapCode.includes('OUT_OF_STOCK') || sapCode.includes('INSUFFICIENT_STOCK')) {
+        const inner = errorData?.error?.innererror ?? {}
+        const err = new Error(errorData?.error?.message?.value ?? 'Stock insuficiente')
+        err.code = 'OUT_OF_STOCK'
+        err.productCode = inner.ProductCode ?? null
+        err.requested   = inner.Requested   ?? null
+        err.available   = inner.Available   ?? null
+        throw err
+      }
+
       this.log.error({ url, status: res.status, body: text }, 'SAP OData error')
       throw new Error(`SAP responded with ${res.status}: ${text}`)
     }

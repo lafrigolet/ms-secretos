@@ -49,6 +49,16 @@ export class SapIntegrationClient {
   createOrder (sapCode, items) {
     if (isStubMode()) {
       console.log(`[stub] SapIntegrationClient.createOrder(${sapCode}, items:${items.length})`)
+      // Simular OUT_OF_STOCK: cualquier item con productCode 'P-OUT-OF-STOCK'
+      const oosItem = items.find(i => i.productCode === 'P-OUT-OF-STOCK')
+      if (oosItem) {
+        const err = new Error('Stock insuficiente para P-OUT-OF-STOCK')
+        err.code = 'OUT_OF_STOCK'
+        err.productCode = 'P-OUT-OF-STOCK'
+        err.requested = oosItem.quantity
+        err.available = 0
+        return Promise.reject(err)
+      }
       const total = items.reduce((s, i) => s + (i.unitPrice ?? 0) * i.quantity, 0)
       const order = {
         orderId: `SDA-2025-${String(++stubCounter)}`,

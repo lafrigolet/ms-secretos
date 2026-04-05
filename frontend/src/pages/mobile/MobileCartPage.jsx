@@ -19,6 +19,7 @@ export function MobileCartPage () {
   const { cart, updateItem, removeItem, clearCart, loading: cartLoading } = useCartContext()
   const [confirming, setConfirming] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
+  const [orderError, setOrderError]   = useState(null)
 
   const { data: summary } = useAsync(
     () => promotionsApi.calculate(cart.items ?? [], cart.subtotal ?? 0),
@@ -36,13 +37,17 @@ export function MobileCartPage () {
   async function handleConfirm () {
     if (items.length === 0) return
     setConfirming(true)
+    setOrderError(null)
     try {
       const order = await ordersApi.createOrder(items)
       await clearCart()
       setOrderResult(order)
     } catch (err) {
-      console.error('createOrder failed:', err)
-      alert(`Error al confirmar el pedido: ${err.message ?? 'Inténtalo de nuevo.'}`)
+      if (err.code === 'OUT_OF_STOCK') {
+        setOrderError(`Sin stock suficiente para "${err.details?.productCode ?? 'un producto'}". Ajusta las cantidades e inténtalo de nuevo.`)
+      } else {
+        setOrderError(err.message ?? 'Error al confirmar el pedido. Inténtalo de nuevo.')
+      }
     } finally {
       setConfirming(false)
     }
@@ -259,6 +264,11 @@ export function MobileCartPage () {
 
       {/* CTA */}
       <div className="px-4 pb-8">
+        {orderError && (
+          <div className="mb-4 px-4 py-3 text-sm text-red-700 rounded-lg" style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+            {orderError}
+          </div>
+        )}
         <button
           onClick={handleConfirm}
           disabled={confirming || cartLoading}

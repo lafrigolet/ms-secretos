@@ -104,4 +104,42 @@ describe('sap-integration-service — integration', () => {
       }
     })
   })
+
+  // ── Orders — OUT_OF_STOCK ──────────────────────────────────────
+  describe('POST /internal/orders — stock insuficiente', () => {
+    test('quantity exceeding stock returns 409 OUT_OF_STOCK', async () => {
+      const { status, body } = await post(P, '/internal/orders', {
+        body: {
+          sapCode: 'SDA-00423',
+          items: [{ productCode: 'P-RT-001', quantity: 99999, unitPrice: 16.00 }]
+        }
+      })
+      assert.equal(status, 409)
+      assert.equal(body.error, 'OUT_OF_STOCK')
+      assert.equal(body.productCode, 'P-RT-001')
+    })
+
+    test('OUT_OF_STOCK response includes requested and available', async () => {
+      const { body } = await post(P, '/internal/orders', {
+        body: {
+          sapCode: 'SDA-00423',
+          items: [{ productCode: 'P-RT-001', quantity: 99999, unitPrice: 16.00 }]
+        }
+      })
+      assert.equal(body.requested, 99999)
+      assert.equal(body.available, 240)
+    })
+
+    test('unknown product (stock=0) returns 409', async () => {
+      const { status, body } = await post(P, '/internal/orders', {
+        body: {
+          sapCode: 'SDA-00423',
+          items: [{ productCode: 'P-UNKNOWN', quantity: 1, unitPrice: 10.00 }]
+        }
+      })
+      assert.equal(status, 409)
+      assert.equal(body.error, 'OUT_OF_STOCK')
+      assert.equal(body.available, 0)
+    })
+  })
 })

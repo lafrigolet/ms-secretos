@@ -115,12 +115,36 @@ All routes are prefixed with `/internal/` — they are not exposed through Nginx
 
 ## Caching
 
-`SapService` wraps every adapter call with an optional in-memory cache keyed by resource type. TTLs are controlled per resource type via environment variables.
+`SapService` wraps every adapter call with an optional in-memory cache (`Map`) keyed by resource type. TTLs are controlled per resource type via environment variables (0 = disabled).
 
-- Credentials are **never** cached.
-- Orders are **never** cached (always fresh).
-- Creating an order **invalidates** all stock cache entries.
-- Updating a customer profile or status **invalidates** the affected customer cache entry.
+### Datos cacheados
+
+| Recurso                        | Clave de caché                  | TTL env var           |
+|--------------------------------|---------------------------------|-----------------------|
+| Cliente individual             | `customer:{sapCode}`            | `CACHE_TTL_CUSTOMERS` |
+| Todos los clientes             | `customers:all`                 | `CACHE_TTL_CUSTOMERS` |
+| Familias de producto           | `families:all`                  | `CACHE_TTL_PRODUCTS`  |
+| Todos los productos            | `products:all`                  | `CACHE_TTL_PRODUCTS`  |
+| Productos por familia          | `products:{familyId}`           | `CACHE_TTL_PRODUCTS`  |
+| Producto individual            | `product:{sapCode}`             | `CACHE_TTL_PRODUCTS`  |
+| Precio por producto + perfil   | `price:{productCode}:{profile}` | `CACHE_TTL_PRICES`    |
+| Todos los precios de un perfil | `prices:{profile}`              | `CACHE_TTL_PRICES`    |
+| Stock individual               | `stock:{productCode}`           | `CACHE_TTL_STOCK`     |
+| Todo el stock                  | `stock:all`                     | `CACHE_TTL_STOCK`     |
+| Factura                        | `invoice:{invoiceId}`           | `CACHE_TTL_PRODUCTS`  |
+
+### Datos no cacheados
+
+| Recurso                      | Motivo                                                     |
+|------------------------------|------------------------------------------------------------|
+| Verificación de credenciales | Seguridad — siempre contra SAP                             |
+| Pedidos del cliente          | Siempre frescos                                            |
+| Pedido individual            | Siempre fresco                                             |
+| Beneficios acumulados        | Siempre frescos                                            |
+| `createOrder`                | Mutación — además invalida todas las entradas `stock:*`    |
+| `updateProfile`              | Mutación — invalida `customer:{sapCode}` y `customers:all` |
+| `updateStatus`               | Mutación — invalida `customer:{sapCode}` y `customers:all` |
+| `createCreditNote`           | Mutación                                                   |
 
 ---
 

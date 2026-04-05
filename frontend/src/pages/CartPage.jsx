@@ -27,6 +27,7 @@ export function CartPage () {
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed]   = useState(false)
   const [orderResult, setOrderResult] = useState(null)
+  const [orderError, setOrderError]   = useState(null)
 
   // HU-12, HU-13 — calcular beneficios automáticamente
   const { data: summary } = useAsync(
@@ -45,14 +46,18 @@ export function CartPage () {
   async function handleConfirm () {
     if (items.length === 0) return
     setConfirming(true)
+    setOrderError(null)
     try {
       const order = await ordersApi.createOrder(items)
       await clearCart()
       setOrderResult(order)
       setConfirmed(true)
     } catch (err) {
-      console.error('createOrder failed:', err)
-      alert(`Error al confirmar el pedido: ${err.message ?? 'Inténtalo de nuevo.'}`)
+      if (err.code === 'OUT_OF_STOCK') {
+        setOrderError(`Sin stock suficiente para "${err.details?.productCode ?? 'un producto'}". Ajusta las cantidades e inténtalo de nuevo.`)
+      } else {
+        setOrderError(err.message ?? 'Error al confirmar el pedido. Inténtalo de nuevo.')
+      }
     } finally {
       setConfirming(false)
     }
@@ -229,6 +234,13 @@ export function CartPage () {
               <span>Total</span>
               <span>{total.toFixed(2)}€</span>
             </div>
+
+            {/* Error al confirmar */}
+            {orderError && (
+              <div className="mt-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {orderError}
+              </div>
+            )}
 
             {/* HU-16 — Confirmar pedido */}
             <button
